@@ -147,3 +147,4 @@ public class ShoppingCart {
 1.避免可变成员变量: 尽量设计 Bean 为无状态。
 2.使用ThreadLocal: 将可变成员变量保存在 ThreadLocal 中，确保线程独立。
 3.使用同步机制: 利用 synchronized 或 ReentrantLock 来进行同步控制，确保线程安全。
+
