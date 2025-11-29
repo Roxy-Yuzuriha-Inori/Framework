@@ -1,13 +1,10 @@
 https://javaguide.cn/system-design/framework/spring/spring-knowledge-and-questions-summary.html#bean-%E6%98%AF%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E7%9A%84%E5%90%97
 # 什么是IOC
-控制反转，将创建对象的权力交给spring容器。
-
-好处：降低耦合，更容易管理资源
-
-场景：Service层要调用Dao层，现有Service层的impl和接口，Dao的impl和接口
-
-不用IOC情况下，直接new Dao层的impl（不能new接口）
-接口名 变量名 = new 实例名（）
+控制反转，将创建对象的权力交给spring容器。<br>
+好处：降低耦合，更容易管理资源<br>
+场景：Service层要调用Dao层，现有Service层的impl和接口，Dao的impl和接口<br>
+不用IOC情况下，直接new Dao层的impl（不能new接口）<br>
+接口名 变量名 = new 实例名（）<br>
 导致问题：实例名实例对象一旦改变，Service层所有new的步骤全部都得改变
 
 用IOC情况下，DI注入
