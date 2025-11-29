@@ -14,12 +14,12 @@ https://javaguide.cn/system-design/framework/spring/spring-knowledge-and-questio
 接口名 变量名 
 
 # 将一个类声明为 Bean 的注解有哪些?
-@Repository : DAO层
-@Service : Service层
-@Controller : controller层
-@Component：随便什么层,作用于类，该类作为一个bean,类中方法返回的对象不会作为bean
- @Component通常是通过类路径扫描来自动侦测以及自动装配到 Spring 容器中（我们可以使用 @ComponentScan 注解定义要扫描的路径从中找出标识了需要装配的类自动装配到 Spring 的 bean 容器中）。
-@Bean:作用于方法，方法返回的第一个对象作为bean
+- @Repository : DAO层<br>
+- @Service : Service层<br>
+- @Controller : controller层<br>
+- @Component：随便什么层,作用于类，该类作为一个bean,类中方法返回的对象不会作为bean<br>
+ - @Component通常是通过类路径扫描来自动侦测以及自动装配到 Spring 容器中（我们可以使用@ComponentScan 注解定义要扫描的路径从中找出标识了需要装配的类自动装配到 Spring 的 bean 容器中）。<br>
+ - @Bean:作用于方法，方法返回的第一个对象作为bean
 
 # 注入 Bean 的注解有哪些？
 ## @Autowired 
