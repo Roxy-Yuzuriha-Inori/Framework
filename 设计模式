@@ -1,0 +1,1949 @@
+> 参考网站：https://www.runoob.com/design-pattern/factory-pattern.html
+黑马web：https://heuqqdmbyk.feishu.cn/wiki/space/7413668442156498972?ccm_open_type=lark_wiki_spaceLink&open_tab_from=wiki_home
+# 设计模式简介
+1. 创建型模式（5 种）：负责 “对象创建”，解耦对象创建与使用
+核心目标是：隐藏对象创建的细节，让代码更灵活（如切换对象类型时无需修改大量代码）。
+单例模式（Singleton）：确保一个类只有一个实例，并提供全局访问点（如配置管理器、线程池）。
+工厂方法模式（Factory Method）：定义创建对象的接口，让子类决定实例化哪个类（如日志工厂：子类可生成文件日志、控制台日志）。
+抽象工厂模式（Abstract Factory）：提供一个接口，创建一系列相关 / 依赖对象，无需指定具体类（如 “操作系统组件工厂”：同时创建 Windows 按钮 + Windows 文本框，或 macOS 按钮 + macOS 文本框）。
+建造者模式（Builder）：将复杂对象的构建与表示分离，分步创建对象（如构建一个包含 “标题、内容、作者、日期” 的文章对象，支持按需选择步骤）。
+原型模式（Prototype）：通过复制现有对象（原型）创建新对象，避免重复初始化（如大量创建相同基础属性的用户对象时，复制原型比重复 new 更高效）。
+2. 结构型模式（7 种）：负责 “对象组合”，优化类 / 对象的结构
+核心目标是：处理类或对象的组合关系，实现灵活的结构扩展（如复用现有类、适配不同接口）。
+适配器模式（Adapter）：将一个类的接口转换成客户端期望的另一个接口，解决 “接口不兼容” 问题（如将 “USB-C 接口” 适配为 “USB-A 接口”，让旧设备可用新配件）。
+桥接模式（Bridge）：将 “抽象部分” 与 “实现部分” 分离，两者可独立扩展（如 “形状” 与 “颜色” 分离：形状（圆形、方形）和颜色（红色、蓝色）可自由组合，无需新增 “红色圆形”“蓝色方形” 等类）。
+组合模式（Composite）：将对象组合成树形结构，统一处理 “单个对象” 和 “对象集合”（如文件系统：文件夹（集合）和文件（单个对象）都可被 “删除”“复制”，用户无需区分）。
+装饰器模式（Decorator）：动态给对象添加额外功能，不改变原类结构（如咖啡：基础咖啡可动态添加 “牛奶”“糖”“奶油”，每种添加物都是一个装饰器，组合出多种产品）。
+外观模式（Facade）：为复杂子系统提供一个简化的统一接口（如智能家居：用户只需按 “回家模式”，系统自动调用 “开灯、开空调、拉窗帘” 等子系统，无需逐个操作）。
+享元模式（Flyweight）：复用大量细粒度对象，减少内存消耗（如游戏中的 “树木”“小草”：相同外观的对象共享一个 “享元对象”，只存储不同的位置信息）。
+代理模式（Proxy）：为其他对象提供 “代理”，控制对原对象的访问（如远程代理：通过本地代理对象访问远程服务器的对象；缓存代理：先从缓存获取数据，缓存未命中再查数据库）。
+3. 行为型模式（11 种）：负责 “对象交互”，优化对象间的通信与职责分配
+核心目标是：定义对象间的交互规则，减少耦合，让行为更易扩展。
+责任链模式（Chain of Responsibility）：将请求的处理者连成链，请求沿链传递，直到被处理（如请假审批：员工请假→组长审批（≤1 天）→经理审批（≤3 天）→总监审批（>3 天），无需员工指定审批人）。
+命令模式（Command）：将 “请求” 封装成对象，支持请求的存储、撤销、队列化（如遥控器：每个按钮（开、关、调温）都是一个 “命令对象”，可记录操作历史，支持 “撤销” 上一步）。
+解释器模式（Interpreter）：定义语言的语法规则，并构建解释器来解析该语言（如简单表达式计算器：解析 “1+2*3” 这类表达式，定义 “数字”“加号”“乘号” 的语法规则）。
+迭代器模式（Iterator）：提供一种方法遍历集合对象，无需暴露集合的内部结构（如 Java 的Iterator接口：遍历List或Set时，无需知道其底层是数组还是链表，统一用hasNext()和next()）。
+中介者模式（Mediator）：用一个中介对象封装对象间的交互，减少对象间的直接耦合（如聊天室：用户发送消息无需直接发给其他用户，而是发给 “聊天室中介”，由中介转发，用户间互不依赖）。
+备忘录模式（Memento）：在不破坏封装的前提下，保存对象的内部状态，以便后续恢复（如文本编辑器的 “撤销”：每次编辑前保存当前内容（备忘录），撤销时恢复到之前的状态）。
+观察者模式（Observer）：定义 “一对多” 的依赖关系，当一个对象（主题）状态变化时，所有依赖它的对象（观察者）自动更新（如订阅公众号：公众号（主题）更新文章后，所有订阅用户（观察者）都会收到推送）。
+状态模式（State）：将对象的状态封装成独立类，让对象在不同状态下有不同行为（如电梯：“开门状态” 下只能执行 “关门”，“运行状态” 下只能执行 “停层”，状态变化时行为自动切换）。
+策略模式（Strategy）：定义一系列算法，将每个算法封装起来，可互相替换（如支付方式：订单支付时，可选择 “支付宝”“微信支付”“银行卡支付”，每种支付是一个策略，用户切换时无需修改订单类）。
+模板方法模式（Template Method）：定义一个算法的骨架，将步骤延迟到子类实现（如报表生成：父类定义 “读取数据→处理数据→生成报表” 的骨架，子类分别实现 “Excel 报表”“PDF 报表” 的生成步骤）。
+访问者模式（Visitor）：在不修改集合元素类的前提下，为元素添加新的操作（如文档解析：文档包含 “文本”“图片”“表格”，访问者可新增 “统计字数”“提取关键词” 等操作，无需修改元素类）。
+# 创建型模式
+## 简单工厂模式（不属于23种设计模式之一）
+简单工厂模式不是一个正式的设计模式，但它是工厂模式的基础。它使用一个单独的工厂类来创建不同的对象，根据传入的参数决定创建哪种类型的对象
+```java
+//1.创建一个实体类接口
+public class Rectangle implements Shape {
+ 
+   @Override
+   public void draw() {
+      System.out.println("Inside Rectangle::draw() method.");
+   }
+}
+//2.创建实现这个接口的三个实体类
+public class Rectangle implements Shape {
+ 
+   @Override
+   public void draw() {
+      System.out.println("Inside Rectangle::draw() method.");
+   }
+}
+public class Square implements Shape {
+ 
+   @Override
+   public void draw() {
+      System.out.println("Inside Square::draw() method.");
+   }
+}
+public class Circle implements Shape {
+ 
+   @Override
+   public void draw() {
+      System.out.println("Inside Circle::draw() method.");
+   }
+}
+//3.创建一个工厂类，用于new实体类，制造实例对象
+public class ShapeFactory {
+    
+   //返回的是实现接口Shape类型的对象
+   public Shape getShape(String shapeType){
+      if(shapeType == null){
+         return null;
+      }        
+      if(shapeType.equalsIgnoreCase("CIRCLE")){
+         return new Circle();
+      } else if(shapeType.equalsIgnoreCase("RECTANGLE")){
+         return new Rectangle();
+      } else if(shapeType.equalsIgnoreCase("SQUARE")){
+         return new Square();
+      }
+      return null;
+   }
+}
+//4.主方法通过工厂来new对象
+public class FactoryPatternDemo {
+ 
+   public static void main(String[] args) {
+
+      ShapeFactory shapeFactory = new ShapeFactory();
+ 
+      //获取 Circle 的对象，并调用它的 draw 方法
+      Shape shape1 = shapeFactory.getShape("CIRCLE");
+ 
+      //调用 Circle 的 draw 方法
+      shape1.draw();
+ 
+      //获取 Rectangle 的对象，并调用它的 draw 方法
+      Shape shape2 = shapeFactory.getShape("RECTANGLE");
+ 
+      //调用 Rectangle 的 draw 方法
+      shape2.draw();
+ 
+      //获取 Square 的对象，并调用它的 draw 方法
+      Shape shape3 = shapeFactory.getShape("SQUARE");
+ 
+      //调用 Square 的 draw 方法
+      shape3.draw();
+   }
+}
+
+```
+## 工厂模式
+工厂方法模式定义了一个创建对象的接口，但由子类决定实例化哪个类。工厂方法将对象的创建延迟到子类。
+```java
+//1.文档和文档元素接口
+// 产品接口：文档
+public interface Document {
+    void addElement();
+    void save();
+}
+
+// 产品接口：文档元素
+public interface Element {
+    void draw();
+}
+//2.实现文档和文档元素接口的实现类
+//文档两个实现类：TextDocument和SpreadsheetDocument
+//文档元素两个实现类：TextElement和TableElement
+
+// 具体产品：文本文档
+public class TextDocument implements Document {
+    @Override
+    public void addElement() {
+        System.out.println("文本文档中添加了一个文本元素");
+    }
+    
+    @Override
+    public void save() {
+        System.out.println("文本文档已保存为.txt文件");
+    }
+}
+
+// 具体产品：表格文档
+public class SpreadsheetDocument implements Document {
+    @Override
+    public void addElement() {
+        System.out.println("表格文档中添加了一个单元格元素");
+    }
+    
+    @Override
+    public void save() {
+        System.out.println("表格文档已保存为.xlsx文件");
+    }
+}
+
+// 具体产品：文本元素
+public class TextElement implements Element {
+    @Override
+    public void draw() {
+        System.out.println("绘制文本元素");
+    }
+}
+
+// 具体产品：表格元素
+public class TableElement implements Element {
+    @Override
+    public void draw() {
+        System.out.println("绘制表格元素");
+    }
+}
+
+//3.工厂接口
+public interface DocumentFactory {
+    Document createDocument();  // 创建文档
+    Element createElement();    // 创建元素
+}
+
+//4.工厂实现类
+//两个工厂TextDocumentFactory和SpreadsheetDocumentFactory
+// 具体工厂：文本文档工厂
+public class TextDocumentFactory implements DocumentFactory {
+    @Override
+    public Document createDocument() {
+        return new TextDocument();  // 决定实例化TextDocument
+    }
+    
+    @Override
+    public Element createElement() {
+        return new TextElement();   // 决定实例化TextElement
+    }
+}
+
+// 具体工厂：表格文档工厂
+public class SpreadsheetDocumentFactory implements DocumentFactory {
+    @Override
+    public Document createDocument() {
+        return new SpreadsheetDocument();  // 决定实例化SpreadsheetDocument
+    }
+    
+    @Override
+    public Element createElement() {
+        return new TableElement();         // 决定实例化TableElement
+    }
+}
+//5.客户端实现类
+public class Client {
+    private Document document;
+    private Element element;
+    
+    // 接收工厂作为参数，不依赖具体工厂
+    public Client(DocumentFactory factory) {
+        document = factory.createDocument();
+        element = factory.createElement();
+    }
+    
+    public void work() {
+        document.addElement();
+        element.draw();
+        document.save();
+    }
+    
+    public static void main(String[] args) {
+        // 通过new不同的工厂实现类，做到可以轻松切换不同的工厂，而无需修改Client类
+        //由接口DocumentFactory类型的子类决定实例化哪个类
+        DocumentFactory textFactory = new TextDocumentFactory();
+        Client textClient = new Client(textFactory);
+        textClient.work();
+        
+        System.out.println("---");
+        
+        DocumentFactory spreadsheetFactory = new SpreadsheetDocumentFactory();
+        Client spreadsheetClient = new Client(spreadsheetFactory);
+        spreadsheetClient.work();
+    }
+}
+```
+## 抽象工厂模式
+抽象工厂模式提供一个创建一系列相关或互相依赖对象的接口，而无需指定它们具体的类。
+```java
+//1.形状接口
+public interface Shape {
+   void draw();
+}
+//2.形状接口实现类
+public class Rectangle implements Shape {
+ 
+   @Override
+   public void draw() {
+      System.out.println("Inside Rectangle::draw() method.");
+   }
+}
+public class Square implements Shape {
+ 
+   @Override
+   public void draw() {
+      System.out.println("Inside Square::draw() method.");
+   }
+}
+public class Circle implements Shape {
+ 
+   @Override
+   public void draw() {
+      System.out.println("Inside Circle::draw() method.");
+   }
+}
+//3.颜色接口
+public interface Color {
+   void fill();
+}
+//4.颜色接口实现类
+public class Red implements Color {
+ 
+   @Override
+   public void fill() {
+      System.out.println("Inside Red::fill() method.");
+   }
+}
+public class Green implements Color {
+ 
+   @Override
+   public void fill() {
+      System.out.println("Inside Green::fill() method.");
+   }
+}
+public class Blue implements Color {
+ 
+   @Override
+   public void fill() {
+      System.out.println("Inside Blue::fill() method.");
+   }
+}
+//5.工厂抽象类
+public abstract class AbstractFactory {
+   public abstract Color getColor(String color);
+   public abstract Shape getShape(String shape);
+}
+//6.工厂实现类
+public class ShapeFactory extends AbstractFactory {
+    
+   @Override
+   public Shape getShape(String shapeType){
+      if(shapeType == null){
+         return null;
+      }        
+      if(shapeType.equalsIgnoreCase("CIRCLE")){
+         return new Circle();
+      } else if(shapeType.equalsIgnoreCase("RECTANGLE")){
+         return new Rectangle();
+      } else if(shapeType.equalsIgnoreCase("SQUARE")){
+         return new Square();
+      }
+      return null;
+   }
+   
+   @Override
+   public Color getColor(String color) {
+      return null;
+   }
+}
+public class ColorFactory extends AbstractFactory {
+    
+   @Override
+   public Shape getShape(String shapeType){
+      return null;
+   }
+   
+   @Override
+   public Color getColor(String color) {
+      if(color == null){
+         return null;
+      }        
+      if(color.equalsIgnoreCase("RED")){
+         return new Red();
+      } else if(color.equalsIgnoreCase("GREEN")){
+         return new Green();
+      } else if(color.equalsIgnoreCase("BLUE")){
+         return new Blue();
+      }
+      return null;
+   }
+}
+//7.生产工厂类
+public class FactoryProducer {
+   public static AbstractFactory getFactory(String choice){
+      if(choice.equalsIgnoreCase("SHAPE")){
+         return new ShapeFactory();
+      } else if(choice.equalsIgnoreCase("COLOR")){
+         return new ColorFactory();
+      }
+      return null;
+   }
+}
+//8.主方法
+public class AbstractFactoryPatternDemo {
+   public static void main(String[] args) {
+ 
+      //获取形状工厂
+      AbstractFactory shapeFactory = FactoryProducer.getFactory("SHAPE");
+ 
+      //获取形状为 Circle 的对象
+      Shape shape1 = shapeFactory.getShape("CIRCLE");
+ 
+      //调用 Circle 的 draw 方法
+      shape1.draw();
+ 
+      //获取形状为 Rectangle 的对象
+      Shape shape2 = shapeFactory.getShape("RECTANGLE");
+ 
+      //调用 Rectangle 的 draw 方法
+      shape2.draw();
+      
+      //获取形状为 Square 的对象
+      Shape shape3 = shapeFactory.getShape("SQUARE");
+ 
+      //调用 Square 的 draw 方法
+      shape3.draw();
+ 
+      //获取颜色工厂
+      AbstractFactory colorFactory = FactoryProducer.getFactory("COLOR");
+ 
+      //获取颜色为 Red 的对象
+      Color color1 = colorFactory.getColor("RED");
+ 
+      //调用 Red 的 fill 方法
+      color1.fill();
+ 
+      //获取颜色为 Green 的对象
+      Color color2 = colorFactory.getColor("GREEN");
+ 
+      //调用 Green 的 fill 方法
+      color2.fill();
+ 
+      //获取颜色为 Blue 的对象
+      Color color3 = colorFactory.getColor("BLUE");
+ 
+      //调用 Blue 的 fill 方法
+      color3.fill();
+   }
+}
+```
+> 参考网站：https://www.runoob.com/design-pattern/factory-pattern.html
+## 简单工厂模式
+简单工厂模式不是一个正式的设计模式，但它是工厂模式的基础。它使用一个单独的工厂类来创建不同的对象，根据传入的参数决定创建哪种类型的对象
+```java
+//1.创建一个实体类接口
+public class Rectangle implements Shape {
+ 
+   @Override
+   public void draw() {
+      System.out.println("Inside Rectangle::draw() method.");
+   }
+}
+//2.创建实现这个接口的三个实体类
+public class Rectangle implements Shape {
+ 
+   @Override
+   public void draw() {
+      System.out.println("Inside Rectangle::draw() method.");
+   }
+}
+public class Square implements Shape {
+ 
+   @Override
+   public void draw() {
+      System.out.println("Inside Square::draw() method.");
+   }
+}
+public class Circle implements Shape {
+ 
+   @Override
+   public void draw() {
+      System.out.println("Inside Circle::draw() method.");
+   }
+}
+//3.创建一个工厂类，用于new实体类，制造实例对象
+public class ShapeFactory {
+    
+   //返回的是实现接口Shape类型的对象
+   public Shape getShape(String shapeType){
+      if(shapeType == null){
+         return null;
+      }        
+      if(shapeType.equalsIgnoreCase("CIRCLE")){
+         return new Circle();
+      } else if(shapeType.equalsIgnoreCase("RECTANGLE")){
+         return new Rectangle();
+      } else if(shapeType.equalsIgnoreCase("SQUARE")){
+         return new Square();
+      }
+      return null;
+   }
+}
+//4.主方法通过工厂来new对象
+public class FactoryPatternDemo {
+ 
+   public static void main(String[] args) {
+
+      ShapeFactory shapeFactory = new ShapeFactory();
+ 
+      //获取 Circle 的对象，并调用它的 draw 方法
+      Shape shape1 = shapeFactory.getShape("CIRCLE");
+ 
+      //调用 Circle 的 draw 方法
+      shape1.draw();
+ 
+      //获取 Rectangle 的对象，并调用它的 draw 方法
+      Shape shape2 = shapeFactory.getShape("RECTANGLE");
+ 
+      //调用 Rectangle 的 draw 方法
+      shape2.draw();
+ 
+      //获取 Square 的对象，并调用它的 draw 方法
+      Shape shape3 = shapeFactory.getShape("SQUARE");
+ 
+      //调用 Square 的 draw 方法
+      shape3.draw();
+   }
+}
+
+```
+## 工厂模式
+工厂方法模式定义了一个创建对象的接口，但由子类决定实例化哪个类。工厂方法将对象的创建延迟到子类。
+```java
+//1.文档和文档元素接口
+// 产品接口：文档
+public interface Document {
+    void addElement();
+    void save();
+}
+
+// 产品接口：文档元素
+public interface Element {
+    void draw();
+}
+//2.实现文档和文档元素接口的实现类
+//文档两个实现类：TextDocument和SpreadsheetDocument
+//文档元素两个实现类：TextElement和TableElement
+
+// 具体产品：文本文档
+public class TextDocument implements Document {
+    @Override
+    public void addElement() {
+        System.out.println("文本文档中添加了一个文本元素");
+    }
+    
+    @Override
+    public void save() {
+        System.out.println("文本文档已保存为.txt文件");
+    }
+}
+
+// 具体产品：表格文档
+public class SpreadsheetDocument implements Document {
+    @Override
+    public void addElement() {
+        System.out.println("表格文档中添加了一个单元格元素");
+    }
+    
+    @Override
+    public void save() {
+        System.out.println("表格文档已保存为.xlsx文件");
+    }
+}
+
+// 具体产品：文本元素
+public class TextElement implements Element {
+    @Override
+    public void draw() {
+        System.out.println("绘制文本元素");
+    }
+}
+
+// 具体产品：表格元素
+public class TableElement implements Element {
+    @Override
+    public void draw() {
+        System.out.println("绘制表格元素");
+    }
+}
+
+//3.工厂接口
+public interface DocumentFactory {
+    Document createDocument();  // 创建文档
+    Element createElement();    // 创建元素
+}
+
+//4.工厂实现类
+//两个工厂TextDocumentFactory和SpreadsheetDocumentFactory
+// 具体工厂：文本文档工厂
+public class TextDocumentFactory implements DocumentFactory {
+    @Override
+    public Document createDocument() {
+        return new TextDocument();  // 决定实例化TextDocument
+    }
+    
+    @Override
+    public Element createElement() {
+        return new TextElement();   // 决定实例化TextElement
+    }
+}
+
+// 具体工厂：表格文档工厂
+public class SpreadsheetDocumentFactory implements DocumentFactory {
+    @Override
+    public Document createDocument() {
+        return new SpreadsheetDocument();  // 决定实例化SpreadsheetDocument
+    }
+    
+    @Override
+    public Element createElement() {
+        return new TableElement();         // 决定实例化TableElement
+    }
+}
+//5.客户端实现类
+public class Client {
+    private Document document;
+    private Element element;
+    
+    // 接收工厂作为参数，不依赖具体工厂
+    public Client(DocumentFactory factory) {
+        document = factory.createDocument();
+        element = factory.createElement();
+    }
+    
+    public void work() {
+        document.addElement();
+        element.draw();
+        document.save();
+    }
+    
+    public static void main(String[] args) {
+        // 通过new不同的工厂实现类，做到可以轻松切换不同的工厂，而无需修改Client类
+        //由接口DocumentFactory类型的子类决定实例化哪个类
+        DocumentFactory textFactory = new TextDocumentFactory();
+        Client textClient = new Client(textFactory);
+        textClient.work();
+        
+        System.out.println("---");
+        
+        DocumentFactory spreadsheetFactory = new SpreadsheetDocumentFactory();
+        Client spreadsheetClient = new Client(spreadsheetFactory);
+        spreadsheetClient.work();
+    }
+}
+```
+## 抽象工厂模式
+抽象工厂模式提供一个创建一系列相关或互相依赖对象的接口，而无需指定它们具体的类。
+```java
+//1.形状接口
+public interface Shape {
+   void draw();
+}
+//2.形状接口实现类
+public class Rectangle implements Shape {
+ 
+   @Override
+   public void draw() {
+      System.out.println("Inside Rectangle::draw() method.");
+   }
+}
+public class Square implements Shape {
+ 
+   @Override
+   public void draw() {
+      System.out.println("Inside Square::draw() method.");
+   }
+}
+public class Circle implements Shape {
+ 
+   @Override
+   public void draw() {
+      System.out.println("Inside Circle::draw() method.");
+   }
+}
+//3.颜色接口
+public interface Color {
+   void fill();
+}
+//4.颜色接口实现类
+public class Red implements Color {
+ 
+   @Override
+   public void fill() {
+      System.out.println("Inside Red::fill() method.");
+   }
+}
+public class Green implements Color {
+ 
+   @Override
+   public void fill() {
+      System.out.println("Inside Green::fill() method.");
+   }
+}
+public class Blue implements Color {
+ 
+   @Override
+   public void fill() {
+      System.out.println("Inside Blue::fill() method.");
+   }
+}
+//5.工厂抽象类
+public abstract class AbstractFactory {
+   public abstract Color getColor(String color);
+   public abstract Shape getShape(String shape);
+}
+//6.工厂实现类
+public class ShapeFactory extends AbstractFactory {
+    
+   @Override
+   public Shape getShape(String shapeType){
+      if(shapeType == null){
+         return null;
+      }        
+      if(shapeType.equalsIgnoreCase("CIRCLE")){
+         return new Circle();
+      } else if(shapeType.equalsIgnoreCase("RECTANGLE")){
+         return new Rectangle();
+      } else if(shapeType.equalsIgnoreCase("SQUARE")){
+         return new Square();
+      }
+      return null;
+   }
+   
+   @Override
+   public Color getColor(String color) {
+      return null;
+   }
+}
+public class ColorFactory extends AbstractFactory {
+    
+   @Override
+   public Shape getShape(String shapeType){
+      return null;
+   }
+   
+   @Override
+   public Color getColor(String color) {
+      if(color == null){
+         return null;
+      }        
+      if(color.equalsIgnoreCase("RED")){
+         return new Red();
+      } else if(color.equalsIgnoreCase("GREEN")){
+         return new Green();
+      } else if(color.equalsIgnoreCase("BLUE")){
+         return new Blue();
+      }
+      return null;
+   }
+}
+//7.生产工厂类
+public class FactoryProducer {
+   public static AbstractFactory getFactory(String choice){
+      if(choice.equalsIgnoreCase("SHAPE")){
+         return new ShapeFactory();
+      } else if(choice.equalsIgnoreCase("COLOR")){
+         return new ColorFactory();
+      }
+      return null;
+   }
+}
+//8.主方法
+public class AbstractFactoryPatternDemo {
+   public static void main(String[] args) {
+ 
+      //获取形状工厂
+      AbstractFactory shapeFactory = FactoryProducer.getFactory("SHAPE");
+ 
+      //获取形状为 Circle 的对象
+      Shape shape1 = shapeFactory.getShape("CIRCLE");
+ 
+      //调用 Circle 的 draw 方法
+      shape1.draw();
+ 
+      //获取形状为 Rectangle 的对象
+      Shape shape2 = shapeFactory.getShape("RECTANGLE");
+ 
+      //调用 Rectangle 的 draw 方法
+      shape2.draw();
+      
+      //获取形状为 Square 的对象
+      Shape shape3 = shapeFactory.getShape("SQUARE");
+ 
+      //调用 Square 的 draw 方法
+      shape3.draw();
+ 
+      //获取颜色工厂
+      AbstractFactory colorFactory = FactoryProducer.getFactory("COLOR");
+ 
+      //获取颜色为 Red 的对象
+      Color color1 = colorFactory.getColor("RED");
+ 
+      //调用 Red 的 fill 方法
+      color1.fill();
+ 
+      //获取颜色为 Green 的对象
+      Color color2 = colorFactory.getColor("GREEN");
+ 
+      //调用 Green 的 fill 方法
+      color2.fill();
+ 
+      //获取颜色为 Blue 的对象
+      Color color3 = colorFactory.getColor("BLUE");
+ 
+      //调用 Blue 的 fill 方法
+      color3.fill();
+   }
+}
+```
+> 参考网站：https://www.runoob.com/design-pattern/factory-pattern.html
+## 简单工厂模式
+简单工厂模式不是一个正式的设计模式，但它是工厂模式的基础。它使用一个单独的工厂类来创建不同的对象，根据传入的参数决定创建哪种类型的对象
+```java
+//1.创建一个实体类接口
+public class Rectangle implements Shape {
+ 
+   @Override
+   public void draw() {
+      System.out.println("Inside Rectangle::draw() method.");
+   }
+}
+//2.创建实现这个接口的三个实体类
+public class Rectangle implements Shape {
+ 
+   @Override
+   public void draw() {
+      System.out.println("Inside Rectangle::draw() method.");
+   }
+}
+public class Square implements Shape {
+ 
+   @Override
+   public void draw() {
+      System.out.println("Inside Square::draw() method.");
+   }
+}
+public class Circle implements Shape {
+ 
+   @Override
+   public void draw() {
+      System.out.println("Inside Circle::draw() method.");
+   }
+}
+//3.创建一个工厂类，用于new实体类，制造实例对象
+public class ShapeFactory {
+    
+   //返回的是实现接口Shape类型的对象
+   public Shape getShape(String shapeType){
+      if(shapeType == null){
+         return null;
+      }        
+      if(shapeType.equalsIgnoreCase("CIRCLE")){
+         return new Circle();
+      } else if(shapeType.equalsIgnoreCase("RECTANGLE")){
+         return new Rectangle();
+      } else if(shapeType.equalsIgnoreCase("SQUARE")){
+         return new Square();
+      }
+      return null;
+   }
+}
+//4.主方法通过工厂来new对象
+public class FactoryPatternDemo {
+ 
+   public static void main(String[] args) {
+
+      ShapeFactory shapeFactory = new ShapeFactory();
+ 
+      //获取 Circle 的对象，并调用它的 draw 方法
+      Shape shape1 = shapeFactory.getShape("CIRCLE");
+ 
+      //调用 Circle 的 draw 方法
+      shape1.draw();
+ 
+      //获取 Rectangle 的对象，并调用它的 draw 方法
+      Shape shape2 = shapeFactory.getShape("RECTANGLE");
+ 
+      //调用 Rectangle 的 draw 方法
+      shape2.draw();
+ 
+      //获取 Square 的对象，并调用它的 draw 方法
+      Shape shape3 = shapeFactory.getShape("SQUARE");
+ 
+      //调用 Square 的 draw 方法
+      shape3.draw();
+   }
+}
+
+```
+## 工厂模式
+工厂方法模式定义了一个创建对象的接口，但由子类决定实例化哪个类。工厂方法将对象的创建延迟到子类。
+```java
+//1.文档和文档元素接口
+// 产品接口：文档
+public interface Document {
+    void addElement();
+    void save();
+}
+
+// 产品接口：文档元素
+public interface Element {
+    void draw();
+}
+//2.实现文档和文档元素接口的实现类
+//文档两个实现类：TextDocument和SpreadsheetDocument
+//文档元素两个实现类：TextElement和TableElement
+
+// 具体产品：文本文档
+public class TextDocument implements Document {
+    @Override
+    public void addElement() {
+        System.out.println("文本文档中添加了一个文本元素");
+    }
+    
+    @Override
+    public void save() {
+        System.out.println("文本文档已保存为.txt文件");
+    }
+}
+
+// 具体产品：表格文档
+public class SpreadsheetDocument implements Document {
+    @Override
+    public void addElement() {
+        System.out.println("表格文档中添加了一个单元格元素");
+    }
+    
+    @Override
+    public void save() {
+        System.out.println("表格文档已保存为.xlsx文件");
+    }
+}
+
+// 具体产品：文本元素
+public class TextElement implements Element {
+    @Override
+    public void draw() {
+        System.out.println("绘制文本元素");
+    }
+}
+
+// 具体产品：表格元素
+public class TableElement implements Element {
+    @Override
+    public void draw() {
+        System.out.println("绘制表格元素");
+    }
+}
+
+//3.工厂接口
+public interface DocumentFactory {
+    Document createDocument();  // 创建文档
+    Element createElement();    // 创建元素
+}
+
+//4.工厂实现类
+//两个工厂TextDocumentFactory和SpreadsheetDocumentFactory
+// 具体工厂：文本文档工厂
+public class TextDocumentFactory implements DocumentFactory {
+    @Override
+    public Document createDocument() {
+        return new TextDocument();  // 决定实例化TextDocument
+    }
+    
+    @Override
+    public Element createElement() {
+        return new TextElement();   // 决定实例化TextElement
+    }
+}
+
+// 具体工厂：表格文档工厂
+public class SpreadsheetDocumentFactory implements DocumentFactory {
+    @Override
+    public Document createDocument() {
+        return new SpreadsheetDocument();  // 决定实例化SpreadsheetDocument
+    }
+    
+    @Override
+    public Element createElement() {
+        return new TableElement();         // 决定实例化TableElement
+    }
+}
+//5.客户端实现类
+public class Client {
+    private Document document;
+    private Element element;
+    
+    // 接收工厂作为参数，不依赖具体工厂
+    public Client(DocumentFactory factory) {
+        document = factory.createDocument();
+        element = factory.createElement();
+    }
+    
+    public void work() {
+        document.addElement();
+        element.draw();
+        document.save();
+    }
+    
+    public static void main(String[] args) {
+        // 通过new不同的工厂实现类，做到可以轻松切换不同的工厂，而无需修改Client类
+        //由接口DocumentFactory类型的子类决定实例化哪个类
+        DocumentFactory textFactory = new TextDocumentFactory();
+        Client textClient = new Client(textFactory);
+        textClient.work();
+        
+        System.out.println("---");
+        
+        DocumentFactory spreadsheetFactory = new SpreadsheetDocumentFactory();
+        Client spreadsheetClient = new Client(spreadsheetFactory);
+        spreadsheetClient.work();
+    }
+}
+```
+## 抽象工厂模式
+抽象工厂模式提供一个创建一系列相关或互相依赖对象的接口，而无需指定它们具体的类。
+```java
+//1.形状接口
+public interface Shape {
+   void draw();
+}
+//2.形状接口实现类
+public class Rectangle implements Shape {
+ 
+   @Override
+   public void draw() {
+      System.out.println("Inside Rectangle::draw() method.");
+   }
+}
+public class Square implements Shape {
+ 
+   @Override
+   public void draw() {
+      System.out.println("Inside Square::draw() method.");
+   }
+}
+public class Circle implements Shape {
+ 
+   @Override
+   public void draw() {
+      System.out.println("Inside Circle::draw() method.");
+   }
+}
+//3.颜色接口
+public interface Color {
+   void fill();
+}
+//4.颜色接口实现类
+public class Red implements Color {
+ 
+   @Override
+   public void fill() {
+      System.out.println("Inside Red::fill() method.");
+   }
+}
+public class Green implements Color {
+ 
+   @Override
+   public void fill() {
+      System.out.println("Inside Green::fill() method.");
+   }
+}
+public class Blue implements Color {
+ 
+   @Override
+   public void fill() {
+      System.out.println("Inside Blue::fill() method.");
+   }
+}
+//5.工厂抽象类
+public abstract class AbstractFactory {
+   public abstract Color getColor(String color);
+   public abstract Shape getShape(String shape);
+}
+//6.工厂实现类
+public class ShapeFactory extends AbstractFactory {
+    
+   @Override
+   public Shape getShape(String shapeType){
+      if(shapeType == null){
+         return null;
+      }        
+      if(shapeType.equalsIgnoreCase("CIRCLE")){
+         return new Circle();
+      } else if(shapeType.equalsIgnoreCase("RECTANGLE")){
+         return new Rectangle();
+      } else if(shapeType.equalsIgnoreCase("SQUARE")){
+         return new Square();
+      }
+      return null;
+   }
+   
+   @Override
+   public Color getColor(String color) {
+      return null;
+   }
+}
+public class ColorFactory extends AbstractFactory {
+    
+   @Override
+   public Shape getShape(String shapeType){
+      return null;
+   }
+   
+   @Override
+   public Color getColor(String color) {
+      if(color == null){
+         return null;
+      }        
+      if(color.equalsIgnoreCase("RED")){
+         return new Red();
+      } else if(color.equalsIgnoreCase("GREEN")){
+         return new Green();
+      } else if(color.equalsIgnoreCase("BLUE")){
+         return new Blue();
+      }
+      return null;
+   }
+}
+//7.生产工厂类
+public class FactoryProducer {
+   public static AbstractFactory getFactory(String choice){
+      if(choice.equalsIgnoreCase("SHAPE")){
+         return new ShapeFactory();
+      } else if(choice.equalsIgnoreCase("COLOR")){
+         return new ColorFactory();
+      }
+      return null;
+   }
+}
+//8.主方法
+public class AbstractFactoryPatternDemo {
+   public static void main(String[] args) {
+ 
+      //获取形状工厂
+      AbstractFactory shapeFactory = FactoryProducer.getFactory("SHAPE");
+ 
+      //获取形状为 Circle 的对象
+      Shape shape1 = shapeFactory.getShape("CIRCLE");
+ 
+      //调用 Circle 的 draw 方法
+      shape1.draw();
+ 
+      //获取形状为 Rectangle 的对象
+      Shape shape2 = shapeFactory.getShape("RECTANGLE");
+ 
+      //调用 Rectangle 的 draw 方法
+      shape2.draw();
+      
+      //获取形状为 Square 的对象
+      Shape shape3 = shapeFactory.getShape("SQUARE");
+ 
+      //调用 Square 的 draw 方法
+      shape3.draw();
+ 
+      //获取颜色工厂
+      AbstractFactory colorFactory = FactoryProducer.getFactory("COLOR");
+ 
+      //获取颜色为 Red 的对象
+      Color color1 = colorFactory.getColor("RED");
+ 
+      //调用 Red 的 fill 方法
+      color1.fill();
+ 
+      //获取颜色为 Green 的对象
+      Color color2 = colorFactory.getColor("GREEN");
+ 
+      //调用 Green 的 fill 方法
+      color2.fill();
+ 
+      //获取颜色为 Blue 的对象
+      Color color3 = colorFactory.getColor("BLUE");
+ 
+      //调用 Blue 的 fill 方法
+      color3.fill();
+   }
+}
+```
+## 单例模式
+一个类只有一个实例
+```java
+//我们将创建一个 SingleObject 类。SingleObject 类有它的私有构造函数和本身的一个静态实例。
+//SingleObject 类提供了一个静态方法，供外界获取它的静态实例。SingletonPatternDemo 类使用 SingleObject 类来获取 SingleObject 对象
+
+//1.创建一个 Singleton 类。
+public class SingleObject {
+ 
+   //创建 SingleObject 的一个静态对象，静态方法只能访问静态变量
+   private static SingleObject instance = new SingleObject();
+ 
+   //让构造函数为 private，这样该类就不会被实例化
+   private SingleObject(){}
+ 
+   //获取唯一可用的对象
+   public static SingleObject getInstance(){
+      return instance;
+   }
+ 
+   public void showMessage(){
+      System.out.println("Hello World!");
+   }
+}
+
+//2.从 singleton 类获取唯一的对象。
+public class SingletonPatternDemo {
+   public static void main(String[] args) {
+ 
+      //不合法的构造函数
+      //编译时错误：构造函数 SingleObject() 是不可见的
+      //SingleObject object = new SingleObject();
+ 
+      //获取唯一可用的对象
+      SingleObject object = SingleObject.getInstance();
+ 
+      //显示消息
+      object.showMessage();
+   }
+}
+```
+### 懒汉式，线程不安全
+是否 Lazy 初始化：是
+是否多线程安全：否
+实现难度：易
+描述：这种方式是最基本的实现方式，这种实现最大的问题就是不支持多线程。因为没有加锁 synchronized，所以严格意义上它并不算单例模式。
+这种方式 lazy loading 很明显，不要求线程安全，在多线程不能正常工作。
+```java
+public class Singleton {  
+    private static Singleton instance;  
+    private Singleton (){}  
+  
+    public static Singleton getInstance() {  
+        if (instance == null) {  
+            instance = new Singleton();  
+        }  
+        return instance;  
+    }  
+}
+```
+### 懒汉式，线程安全
+是否 Lazy 初始化：是
+是否多线程安全：是
+实现难度：易
+描述：这种方式具备很好的 lazy loading，能够在多线程中很好的工作，但是，效率很低，99% 情况下不需要同步。
+优点：第一次调用才初始化，避免内存浪费。
+缺点：必须加锁 synchronized 才能保证单例，但加锁会影响效率。
+getInstance() 的性能对应用程序不是很关键（该方法使用不太频繁）。
+```java
+public class Singleton {  
+    private static Singleton instance;  
+    private Singleton (){}  
+    public static synchronized Singleton getInstance() {  
+        if (instance == null) {  
+            instance = new Singleton();  
+        }  
+        return instance;  
+    }  
+}
+```
+### 饿汉式
+是否 Lazy 初始化：否
+是否多线程安全：是
+实现难度：易
+描述：这种方式比较常用，但容易产生垃圾对象。
+优点：没有加锁，执行效率会提高。
+缺点：类加载时就初始化，浪费内存。
+它基于 classloader 机制避免了多线程的同步问题，不过，instance 在类装载时就实例化，虽然导致类装载的原因有很多种，在单例模式中大多数都是调用 getInstance 方法， 但是也不能确定有其他的方式（或者其他的静态方法）导致类装载，这时候初始化 instance 显然没有达到 lazy loading 的效果。
+```java
+public class Singleton {  
+    private static Singleton instance = new Singleton();  
+    private Singleton (){}  
+    public static Singleton getInstance() {  
+    return instance;  
+    }  
+}
+```
+### 双检锁/双重校验锁（DCL，即 double-checked locking）
+JDK 版本：JDK1.5 起
+是否 Lazy 初始化：是
+是否多线程安全：是
+实现难度：较复杂
+描述：这种方式采用双锁机制，安全且在多线程情况下能保持高性能。
+getInstance() 的性能对应用程序很关键。
+```java
+public class Singleton {  
+//volatile：防止指令重排序，保证其他线程看到的是完全初始化的对象
+    private volatile static Singleton singleton;  
+    private Singleton (){}  
+    public static Singleton getSingleton() {  
+    if (singleton == null) {  
+//创建对象时候加  synchronized 锁
+        synchronized (Singleton.class) {  
+            if (singleton == null) {  
+                singleton = new Singleton();  
+            }  
+        }  
+    }  
+    return singleton;  
+    }  
+}
+```
+### 登记式/静态内部类
+是否 Lazy 初始化：是
+是否多线程安全：是
+实现难度：一般
+描述：这种方式能达到双检锁方式一样的功效，但实现更简单。对静态域使用延迟初始化，应使用这种方式而不是双检锁方式。这种方式只适用于静态域的情况，双检锁方式可在实例域需要延迟初始化时使用。
+这种方式同样利用了 classloader 机制来保证初始化 instance 时只有一个线程，它跟第 3 种方式不同的是：第 3 种方式只要 Singleton 类被装载了，那么 instance 就会被实例化（没有达到 lazy loading 效果），而这种方式是 Singleton 类被装载了，instance 不一定被初始化。因为 SingletonHolder 类没有被主动使用，只有通过显式调用 getInstance 方法时，才会显式装载 SingletonHolder 类，从而实例化 instance。想象一下，如果实例化 instance 很消耗资源，所以想让它延迟加载，另外一方面，又不希望在 Singleton 类加载时就实例化，因为不能确保 Singleton 类还可能在其他的地方被主动使用从而被加载，那么这个时候实例化 instance 显然是不合适的。这个时候，这种方式相比第 3 种方式就显得很合理。
+``java
+public class Singleton {  
+    private static class SingletonHolder {  
+    private static final Singleton INSTANCE = new Singleton();  
+    }  
+    private Singleton (){}  
+    public static final Singleton getInstance() {  
+        return SingletonHolder.INSTANCE;  
+    }  
+}
+```
+### 枚举
+JDK 版本：JDK1.5 起
+是否 Lazy 初始化：否
+是否多线程安全：是
+实现难度：易
+描述：这种实现方式还没有被广泛采用，但这是实现单例模式的最佳方法。它更简洁，自动支持序列化机制，绝对防止多次实例化。
+这种方式是 Effective Java 作者 Josh Bloch 提倡的方式，它不仅能避免多线程同步问题，而且还自动支持序列化机制，防止反序列化重新创建新的对象，绝对防止多次实例化。不过，由于 JDK1.5 之后才加入 enum 特性，用这种方式写不免让人感觉生疏，在实际工作中，也很少用。
+不能通过 reflection attack 来调用私有构造方法。
+```java
+public enum Singleton {  
+    INSTANCE;  
+    public void whateverMethod() {  
+    }  
+}
+//使用
+Singleton.INSTANCE.whateverMethod();
+```
+### 建造者模式
+一个复杂对象的基本部件不变，而其组合经常变化。
+```java
+//1.食物接口（打包方法，名字，价格）和打包接口
+public interface Item {
+   public String name();
+   public Packing packing();
+   public float price();    
+}
+public interface Packing {
+   public String pack();
+}
+//2.打包接口实体类
+//纸盒
+public class Wrapper implements Packing {
+ 
+   @Override
+   public String pack() {
+      return "Wrapper";
+   }
+}
+//瓶装
+public class Bottle implements Packing {
+ 
+   @Override
+   public String pack() {
+      return "Bottle";
+   }
+}
+//3.实现item接口的抽象类
+//汉堡
+public abstract class Burger implements Item {
+ 
+   @Override
+   public Packing packing() {
+      return new Wrapper();
+   }
+ 
+   @Override
+   public abstract float price();
+}
+//冷饮
+public abstract class ColdDrink implements Item {
+ 
+    @Override
+    public Packing packing() {
+       return new Bottle();
+    }
+ 
+    @Override
+    public abstract float price();
+}
+//4.创建扩展了 Burger 和 ColdDrink 的实体类
+public class VegBurger extends Burger {
+ 
+   @Override
+   public float price() {
+      return 25.0f;
+   }
+ 
+   @Override
+   public String name() {
+      return "Veg Burger";
+   }
+}
+
+public class ChickenBurger extends Burger {
+ 
+   @Override
+   public float price() {
+      return 50.5f;
+   }
+ 
+   @Override
+   public String name() {
+      return "Chicken Burger";
+   }
+}
+
+public class Coke extends ColdDrink {
+ 
+   @Override
+   public float price() {
+      return 30.0f;
+   }
+ 
+   @Override
+   public String name() {
+      return "Coke";
+   }
+}
+
+public class Pepsi extends ColdDrink {
+ 
+   @Override
+   public float price() {
+      return 35.0f;
+   }
+ 
+   @Override
+   public String name() {
+      return "Pepsi";
+   }
+}
+
+//5.复杂对象meal
+import java.util.ArrayList;
+import java.util.List;
+ 
+public class Meal {
+   private List<Item> items = new ArrayList<Item>();    
+ 
+   public void addItem(Item item){
+      items.add(item);
+   }
+ 
+   public float getCost(){
+      float cost = 0.0f;
+      for (Item item : items) {
+         cost += item.price();
+      }        
+      return cost;
+   }
+ 
+   public void showItems(){
+      for (Item item : items) {
+         System.out.print("Item : "+item.name());
+         System.out.print(", Packing : "+item.packing().pack());
+         System.out.println(", Price : "+item.price());
+      }        
+   }    
+}
+//6.组装meal的对象
+public class MealBuilder {
+ 
+   public Meal prepareVegMeal (){
+      Meal meal = new Meal();
+      meal.addItem(new VegBurger());
+      meal.addItem(new Coke());
+      return meal;
+   }   
+ 
+   public Meal prepareNonVegMeal (){
+      Meal meal = new Meal();
+      meal.addItem(new ChickenBurger());
+      meal.addItem(new Pepsi());
+      return meal;
+   }
+}
+
+//7.BuiderPatternDemo 使用 MealBuilder 来演示建造者模式（Builder Pattern）。
+public class BuilderPatternDemo {
+   public static void main(String[] args) {
+      MealBuilder mealBuilder = new MealBuilder();
+ 
+      Meal vegMeal = mealBuilder.prepareVegMeal();
+      System.out.println("Veg Meal");
+      vegMeal.showItems();
+      System.out.println("Total Cost: " +vegMeal.getCost());
+ 
+      Meal nonVegMeal = mealBuilder.prepareNonVegMeal();
+      System.out.println("\n\nNon-Veg Meal");
+      nonVegMeal.showItems();
+      System.out.println("Total Cost: " +nonVegMeal.getCost());
+   }
+}
+//输出结果
+Veg Meal
+Item : Veg Burger, Packing : Wrapper, Price : 25.0
+Item : Coke, Packing : Bottle, Price : 30.0
+Total Cost: 55.0
+
+
+Non-Veg Meal
+Item : Chicken Burger, Packing : Wrapper, Price : 50.5
+Item : Pepsi, Packing : Bottle, Price : 35.0
+Total Cost: 85.5
+
+```
+## 原型模式
+这种模式是实现了一个原型接口，该接口用于创建当前对象的克隆,实现创建重复的对象。当直接创建对象的代价比较大时，则采用这种模式。
+```java
+//1.创建一个实现了 Cloneable 接口的抽象类。
+public abstract class Shape implements Cloneable {
+   
+   private String id;
+   protected String type;
+   
+   abstract void draw();
+   
+   public String getType(){
+      return type;
+   }
+   
+   public String getId() {
+      return id;
+   }
+   
+   public void setId(String id) {
+      this.id = id;
+   }
+   
+   public Object clone() {
+      Object clone = null;
+      try {
+         clone = super.clone();
+      } catch (CloneNotSupportedException e) {
+         e.printStackTrace();
+      }
+      return clone;
+   }
+}
+
+//2创建扩展了上面抽象类的实体类。
+//长方形
+public class Rectangle extends Shape {
+ 
+   public Rectangle(){
+     type = "Rectangle";
+   }
+ 
+   @Override
+   public void draw() {
+      System.out.println("Inside Rectangle::draw() method.");
+   }
+}
+//正方形
+public class Square extends Shape {
+ 
+   public Square(){
+     type = "Square";
+   }
+ 
+   @Override
+   public void draw() {
+      System.out.println("Inside Square::draw() method.");
+   }
+}
+//圆
+public class Circle extends Shape {
+ 
+   public Circle(){
+     type = "Circle";
+   }
+ 
+   @Override
+   public void draw() {
+      System.out.println("Inside Circle::draw() method.");
+   }
+}
+//3.创建一个类，从数据库获取实体类，并把它们存储在一个 Hashtable 中。
+import java.util.Hashtable;
+ 
+public class ShapeCache {
+    
+   private static Hashtable<String, Shape> shapeMap 
+      = new Hashtable<String, Shape>();
+ 
+   public static Shape getShape(String shapeId) {
+      Shape cachedShape = shapeMap.get(shapeId);
+      return (Shape) cachedShape.clone();
+   }
+ 
+   // 对每种形状都运行数据库查询，并创建该形状
+   // shapeMap.put(shapeKey, shape);
+   // 例如，我们要添加三种形状
+   public static void loadCache() {
+      Circle circle = new Circle();
+      circle.setId("1");
+      shapeMap.put(circle.getId(),circle);
+ 
+      Square square = new Square();
+      square.setId("2");
+      shapeMap.put(square.getId(),square);
+ 
+      Rectangle rectangle = new Rectangle();
+      rectangle.setId("3");
+      shapeMap.put(rectangle.getId(),rectangle);
+   }
+}
+//4.获取Hashtable中的克隆对象
+public class PrototypePatternDemo {
+   public static void main(String[] args) {
+      ShapeCache.loadCache();
+ 
+      Shape clonedShape = (Shape) ShapeCache.getShape("1");
+      System.out.println("Shape : " + clonedShape.getType());        
+ 
+      Shape clonedShape2 = (Shape) ShapeCache.getShape("2");
+      System.out.println("Shape : " + clonedShape2.getType());        
+ 
+      Shape clonedShape3 = (Shape) ShapeCache.getShape("3");
+      System.out.println("Shape : " + clonedShape3.getType());        
+   }
+}
+
+```
+# 结构性模式
+## 适配器模式
+适配器模式是一种软件设计模式，旨在解决不同接口之间的兼容性问题。
+目的：将一个类的接口转换为另一个接口，使得原本不兼容的类可以协同工作。
+```java
+//1.两个不同的接口
+//MediaPlayer接口
+public interface MediaPlayer {
+   public void play(String audioType, String fileName);
+}
+//AdvancedMediaPlayer接口
+public interface AdvancedMediaPlayer { 
+   public void playVlc(String fileName);
+   public void playMp4(String fileName);
+}
+
+//2.两个接口的实体类
+//AdvancedMediaPlayer 接口的实体类
+public class VlcPlayer implements AdvancedMediaPlayer{
+   @Override
+   public void playVlc(String fileName) {
+      System.out.println("Playing vlc file. Name: "+ fileName);      
+   }
+ 
+   @Override
+   public void playMp4(String fileName) {
+      //什么也不做
+   }
+}
+public class Mp4Player implements AdvancedMediaPlayer{
+ 
+   @Override
+   public void playVlc(String fileName) {
+      //什么也不做
+   }
+ 
+   @Override
+   public void playMp4(String fileName) {
+      System.out.println("Playing mp4 file. Name: "+ fileName);      
+   }
+}
+//MediaPlayer 接口的实体类AudioPlayer
+public class AudioPlayer implements MediaPlayer {
+   MediaAdapter mediaAdapter; 
+ 
+   @Override
+   public void play(String audioType, String fileName) {    
+ 
+      //播放 mp3 音乐文件的内置支持
+      if(audioType.equalsIgnoreCase("mp3")){
+         System.out.println("Playing mp3 file. Name: "+ fileName);         
+      } 
+      //如果要其他格式，就调用适配器mediaAdapter 提供了播放其他文件格式的支持
+      else if(audioType.equalsIgnoreCase("vlc") 
+         || audioType.equalsIgnoreCase("mp4")){
+         mediaAdapter = new MediaAdapter(audioType);
+         mediaAdapter.play(audioType, fileName);
+      }
+      else{
+         System.out.println("Invalid media. "+
+            audioType + " format not supported");
+      }
+   }   
+}
+//3.让 AudioPlayer 播放其他格式的音频文件，实现了 MediaPlayer 接口的适配器类MediaAdapter
+public class MediaAdapter implements MediaPlayer {
+ //在适配器类增加另一个功能接口的实现
+   AdvancedMediaPlayer advancedMusicPlayer;
+ 
+   public MediaAdapter(String audioType){
+      if(audioType.equalsIgnoreCase("vlc") ){
+         advancedMusicPlayer = new VlcPlayer();       
+      } else if (audioType.equalsIgnoreCase("mp4")){
+         advancedMusicPlayer = new Mp4Player();
+      }  
+   }
+ 
+   @Override
+   public void play(String audioType, String fileName) {
+      if(audioType.equalsIgnoreCase("vlc")){
+         advancedMusicPlayer.playVlc(fileName);
+      }else if(audioType.equalsIgnoreCase("mp4")){
+         advancedMusicPlayer.playMp4(fileName);
+      }
+   }
+}
+//4.使用已经扩展的AudioPlayer
+public class AdapterPatternDemo {
+   public static void main(String[] args) {
+      AudioPlayer audioPlayer = new AudioPlayer();
+ 
+      audioPlayer.play("mp3", "beyond the horizon.mp3");
+      audioPlayer.play("mp4", "alone.mp4");
+      audioPlayer.play("vlc", "far far away.vlc");
+      audioPlayer.play("avi", "mind me.avi");
+   }
+}
+```
+## 桥接模式
+一个抽象类可以用不同的实现类聚合（而非继承）
+```java
+//1.桥接接口
+public interface DrawAPI {
+   public void drawCircle(int radius, int x, int y);
+}
+//2. DrawAPI 接口的实体桥接实现类
+public class RedCircle implements DrawAPI {
+   @Override
+   public void drawCircle(int radius, int x, int y) {
+      System.out.println("Drawing Circle[ color: red, radius: "
+         + radius +", x: " +x+", "+ y +"]");
+   }
+}
+
+public class GreenCircle implements DrawAPI {
+   @Override
+   public void drawCircle(int radius, int x, int y) {
+      System.out.println("Drawing Circle[ color: green, radius: "
+         + radius +", x: " +x+", "+ y +"]");
+   }
+}
+//3. DrawAPI 接口创建抽象类 Shape。
+public abstract class Shape {
+   protected DrawAPI drawAPI;
+   protected Shape(DrawAPI drawAPI){
+      this.drawAPI = drawAPI;
+   }
+   public abstract void draw();  
+}
+//4.Shape 抽象类的实体类。
+public class Circle extends Shape {
+   private int x, y, radius;
+ //调用实现了接口的类
+   public Circle(int x, int y, int radius, DrawAPI drawAPI) {
+      super(drawAPI);
+      this.x = x;  
+      this.y = y;  
+      this.radius = radius;
+   }
+ //实现了接口的类的方法
+   public void draw() {
+      drawAPI.drawCircle(radius,x,y);
+   }
+}
+//5.使用抽象类的实体类创建实例
+public class BridgePatternDemo {
+   public static void main(String[] args) {
+      Shape redCircle = new Circle(100,100, 10, new RedCircle());
+      Shape greenCircle = new Circle(100,100, 10, new GreenCircle());
+ 
+      redCircle.draw();
+      greenCircle.draw();
+   }
+}
+```
+## 过滤器模式（不属于23种设计模式之一）
+根据多个不同的条件或标准来筛选一组对象
+```java
+//1.创建一个person类，过滤该类
+public class Person {
+   
+   private String name;
+   private String gender;
+   private String maritalStatus;
+ 
+   public Person(String name,String gender,String maritalStatus){
+      this.name = name;
+      this.gender = gender;
+      this.maritalStatus = maritalStatus;    
+   }
+ 
+   public String getName() {
+      return name;
+   }
+   public String getGender() {
+      return gender;
+   }
+   public String getMaritalStatus() {
+      return maritalStatus;
+   }  
+}
+//2.过滤接口Criteria
+import java.util.List;
+ 
+public interface Criteria {
+   public List<Person> meetCriteria(List<Person> persons);
+}
+//3. Criteria 接口的实体类。
+import java.util.ArrayList;
+import java.util.List;
+//过滤男的
+public class CriteriaMale implements Criteria {
+ 
+   @Override
+   public List<Person> meetCriteria(List<Person> persons) {
+      List<Person> malePersons = new ArrayList<Person>(); 
+      for (Person person : persons) {
+         if(person.getGender().equalsIgnoreCase("MALE")){
+            malePersons.add(person);
+         }
+      }
+      return malePersons;
+   }
+}
+//过滤女的
+import java.util.ArrayList;
+import java.util.List;
+ 
+public class CriteriaFemale implements Criteria {
+ 
+   @Override
+   public List<Person> meetCriteria(List<Person> persons) {
+      List<Person> femalePersons = new ArrayList<Person>(); 
+      for (Person person : persons) {
+         if(person.getGender().equalsIgnoreCase("FEMALE")){
+            femalePersons.add(person);
+         }
+      }
+      return femalePersons;
+   }
+}
+//过滤单身的
+import java.util.ArrayList;
+import java.util.List;
+ 
+public class CriteriaSingle implements Criteria {
+ 
+   @Override
+   public List<Person> meetCriteria(List<Person> persons) {
+      List<Person> singlePersons = new ArrayList<Person>(); 
+      for (Person person : persons) {
+         if(person.getMaritalStatus().equalsIgnoreCase("SINGLE")){
+            singlePersons.add(person);
+         }
+      }
+      return singlePersons;
+   }
+}
+//与过滤条件
+import java.util.List;
+ 
+public class AndCriteria implements Criteria {
+ 
+   private Criteria criteria;
+   private Criteria otherCriteria;
+ 
+   public AndCriteria(Criteria criteria, Criteria otherCriteria) {
+      this.criteria = criteria;
+      this.otherCriteria = otherCriteria; 
+   }
+ 
+   @Override
+   public List<Person> meetCriteria(List<Person> persons) {
+//对集合先用一次过滤条件，返回一个集合
+      List<Person> firstCriteriaPersons = criteria.meetCriteria(persons); 
+//再用一次另一个过滤条件    
+      return otherCriteria.meetCriteria(firstCriteriaPersons);
+   }
+}
+//或过滤条件
+import java.util.List;
+ 
+public class OrCriteria implements Criteria {
+ 
+   private Criteria criteria;
+   private Criteria otherCriteria;
+ 
+   public OrCriteria(Criteria criteria, Criteria otherCriteria) {
+      this.criteria = criteria;
+      this.otherCriteria = otherCriteria; 
+   }
+ 
+   @Override
+   public List<Person> meetCriteria(List<Person> persons) {
+      List<Person> firstCriteriaItems = criteria.meetCriteria(persons);
+      List<Person> otherCriteriaItems = otherCriteria.meetCriteria(persons);
+ 
+      for (Person person : otherCriteriaItems) {
+         if(!firstCriteriaItems.contains(person)){
+           firstCriteriaItems.add(person);
+         }
+      }  
+      return firstCriteriaItems;
+   }
+}
+//4.使用过滤标准和结合来过滤Person对象列表
+import java.util.ArrayList; 
+import java.util.List;
+ 
+public class CriteriaPatternDemo {
+   public static void main(String[] args) {
+      List<Person> persons = new ArrayList<Person>();
+ 
+      persons.add(new Person("Robert","Male", "Single"));
+      persons.add(new Person("John","Male", "Married"));
+      persons.add(new Person("Laura","Female", "Married"));
+      persons.add(new Person("Diana","Female", "Single"));
+      persons.add(new Person("Mike","Male", "Single"));
+      persons.add(new Person("Bobby","Male", "Single"));
+//new的是规则
+      Criteria male = new CriteriaMale();
+      Criteria female = new CriteriaFemale();
+      Criteria single = new CriteriaSingle();
+      Criteria singleMale = new AndCriteria(single, male);
+      Criteria singleOrFemale = new OrCriteria(single, female);
+ //meet方法返回的是一个列表
+      System.out.println("Males: ");
+      printPersons(male.meetCriteria(persons));
+ 
+      System.out.println("\nFemales: ");
+      printPersons(female.meetCriteria(persons));
+ 
+      System.out.println("\nSingle Males: ");
+      printPersons(singleMale.meetCriteria(persons));
+ 
+      System.out.println("\nSingle Or Females: ");
+      printPersons(singleOrFemale.meetCriteria(persons));
+   }
+ 
+   public static void printPersons(List<Person> persons){
+      for (Person person : persons) {
+         System.out.println("Person : [ Name : " + person.getName() 
+            +", Gender : " + person.getGender() 
+            +", Marital Status : " + person.getMaritalStatus()
+            +" ]");
+      }
+   }      
+}
+//5.结果
+Males: 
+Person : [ Name : Robert, Gender : Male, Marital Status : Single ]
+Person : [ Name : John, Gender : Male, Marital Status : Married ]
+Person : [ Name : Mike, Gender : Male, Marital Status : Single ]
+Person : [ Name : Bobby, Gender : Male, Marital Status : Single ]
+
+Females: 
+Person : [ Name : Laura, Gender : Female, Marital Status : Married ]
+Person : [ Name : Diana, Gender : Female, Marital Status : Single ]
+
+Single Males: 
+Person : [ Name : Robert, Gender : Male, Marital Status : Single ]
+Person : [ Name : Mike, Gender : Male, Marital Status : Single ]
+Person : [ Name : Bobby, Gender : Male, Marital Status : Single ]
+
+Single Or Females: 
+Person : [ Name : Robert, Gender : Male, Marital Status : Single ]
+Person : [ Name : Diana, Gender : Female, Marital Status : Single ]
+Person : [ Name : Mike, Gender : Male, Marital Status : Single ]
+Person : [ Name : Bobby, Gender : Male, Marital Status : Single ]
+Person : [ Name : Laura, Gender : Female, Marital Status : Married ]
+
+```
+## 组合模式
+
+```java
+
+```
