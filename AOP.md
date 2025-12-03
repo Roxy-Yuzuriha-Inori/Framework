@@ -214,4 +214,155 @@ public class MyAspect6 {
 public @interface LogOperation{
 }
 ```
+## 连接点
+- 对于@Around通知，获取连接点信息只能使用ProceedingJoinPoint类型
+- 对于其他四种通知，获取连接点信息只能使用JoinPoint，它是ProceedingJoinPoint的父类型
+```java
+
+@Around("@Annotation(log)")
+public object around(ProceedingJoinPoint joinPoint,LogOperation log){
+        OperateLog operateLog = new OperateLog();
+        //获取目标对象的全类名  如com.itheima.service.UserService
+        operateLog.setClassName(joinPoint.getTarget().getClass().getName());
+        //获取方法签名的方法名 
+        operateLog.setMethodName(joinPoint.getSignature().getName());
+        //获取目标方法运行参数
+        operateLog.setMethodParams(Arrays.toString(joinPoint.getArgs()));
+}
+```
+
+
 # AOP案例
+```xml
+<!-- 引入AOP依赖 -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-aop</artifactId>
+</dependency>
+
+```
+```java
+//根据数据库表建立实体类
+package com.itheima.pojo;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import java.time.LocalDateTime;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class OperateLog {
+    private Integer id; //ID
+    private Integer operateEmpId; //操作人ID
+    private LocalDateTime operateTime; //操作时间
+    private String className; //操作类名
+    private String methodName; //操作方法名
+    private String methodParams; //操作方法参数
+    private String returnValue; //操作方法返回值
+    private Long costTime; //操作耗时
+}
+
+//准备Mapper接口
+package com.itheima.mapper;
+
+import com.itheima.pojo.OperateLog;
+import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Mapper;
+
+@Mapper
+public interface OperateLogMapper {
+    
+    //插入日志数据
+    @Insert("insert into operate_log (operate_emp_id, operate_time, class_name, method_name, method_params, return_value, cost_time) " +
+            "values (#{operateEmpId}, #{operateTime}, #{className}, #{methodName}, #{methodParams}, #{returnValue}, #{costTime});")
+    public void insert(OperateLog log);
+    
+}
+
+//自定义AOP注解
+/**
+ *  自定义注解，用于标识哪些方法需要记录日志
+ */
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface LogOperation {
+}
+
+//切面类
+import com.itheima.anno.LogOperation;
+import com.itheima.mapper.OperateLogMapper;
+import com.itheima.pojo.OperateLog;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import java.time.LocalDateTime;
+import java.util.Arrays;
+
+@Aspect
+@Component
+public class OperationLogAspect {
+
+    @Autowired
+    private OperateLogMapper operateLogMapper;
+
+    // 环绕通知
+    @Around("@annotation(log)")
+    //形参LogOperation log是日志实体，可以调用log.value(); // 获取注解中的描述信息
+    public Object around(ProceedingJoinPoint joinPoint, LogOperation log) throws Throwable {
+        // 记录开始时间
+        long startTime = System.currentTimeMillis();
+        // 执行方法
+        Object result = joinPoint.proceed();
+        // 当前时间
+        long endTime = System.currentTimeMillis();
+        // 耗时
+        long costTime = endTime - startTime;
+
+        // 构建日志对象
+        OperateLog operateLog = new OperateLog();
+        operateLog.setOperateEmpId(getCurrentUserId()); // 需要实现 getCurrentUserId 方法
+        operateLog.setOperateTime(LocalDateTime.now());
+        operateLog.setClassName(joinPoint.getTarget().getClass().getName());
+        operateLog.setMethodName(joinPoint.getSignature().getName());
+        operateLog.setMethodParams(Arrays.toString(joinPoint.getArgs()));
+        operateLog.setReturnValue(result.toString());
+        operateLog.setCostTime(costTime);
+
+        // 插入日志
+        operateLogMapper.insert(operateLog);
+        return result;
+    }
+    
+    // 示例方法，获取当前用户ID
+    private int getCurrentUserId() {
+          return CurrentHolder.getCurrentId();
+   
+    }
+}
+
+//ThreadLocalUtils
+package com.itheima.utils;
+
+public class CurrentHolder {
+
+    private static final ThreadLocal<Integer> CURRENT_LOCAL = new ThreadLocal<>();
+    //存
+    public static void setCurrentId(Integer employeeId) {
+        CURRENT_LOCAL.set(employeeId);
+    }
+    //取
+    public static Integer getCurrentId() {
+        return CURRENT_LOCAL.get();
+    }
+    //用完释放
+    public static void remove() {
+        CURRENT_LOCAL.remove();
+    }
+}
+```
+## ThreadLocal
+- 一次请求对应一个线程，通过ThreadLocal进行数据共享
