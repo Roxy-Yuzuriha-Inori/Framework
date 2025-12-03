@@ -10,6 +10,7 @@
 # 认证授权
 # 数据安全
 # 系统设计
+# AspectJ
 1.视频 https://www.bilibili.com/video/BV1yGydYEE3H?spm_id_from=333.788.videopod.episodes&vd_source=f33eee63f195f2aa5071789f26697edc&p=123<br>
 2.AOP,MCV,事务 https://javaguide.cn/system-design/framework/spring/spring-knowledge-and-questions-summary.html#spring-%E5%9F%BA%E7%A1%80<br>
 3.桌面四个word<br>

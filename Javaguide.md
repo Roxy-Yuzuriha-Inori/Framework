@@ -103,7 +103,7 @@ public class UserService {
 }
 ```
 # Bean 的作用域有哪些?
-singleton : IoC 容器中只有唯一的 bean 实例。Spring 中的 bean 默认都是单例的，是对单例设计模式的应用。
+singleton : IoC 容器中只有唯一的 bean 实例。Spring 中的 bean 默认都是单例的，是对单例设计模式的应用。项目启动时就创建。
 prototype : 每次获取都会创建一个新的 bean 实例。也就是说，连续 getBean() 两次，得到的是不同的 Bean 实例。
 request （仅 Web 应用可用）: 每一次 HTTP 请求都会产生一个新的 bean（请求 bean），该 bean 仅在当前 HTTP request 内有效。
 session （仅 Web 应用可用） : 每一次来自新 session 的 HTTP 请求都会产生一个新的 bean（会话 bean），该 bean 仅在当前 HTTP session 内有效。
@@ -145,3 +145,60 @@ public class ShoppingCart {
 2.使用ThreadLocal: 将可变成员变量保存在 ThreadLocal 中，确保线程独立。
 3.使用同步机制: 利用 synchronized 或 ReentrantLock 来进行同步控制，确保线程安全。
 
+# 什么时候省略@Autowired
+```java
+//1.一个构造器时，里面的形参不用@Autowired
+@Component
+public class UserService {
+    // 不需要@Autowired
+    public UserService(UserRepository repository, RoleService roleService) {
+        this.repository = repository;
+        this.roleService = roleService;
+    }
+}
+
+//2.@Configuration 类中的Bean方法调用
+@Configuration
+public class AppConfig {
+    
+    @Bean
+    public DataSource dataSource() {
+        return new DataSource();
+    }
+    
+    @Bean
+    // 不需要@Autowired，直接调用方法
+    public JdbcTemplate jdbcTemplate() {
+        return new JdbcTemplate(dataSource());
+    }
+}
+
+//3.测试类中的字段注入
+@SpringBootTest
+class UserServiceTest {
+    // 不需要@Autowired（Spring Boot 2.1+）
+    private UserService userService;
+    
+    // 或者构造器注入
+    public UserServiceTest(UserService userService) {
+        this.userService = userService;
+    }
+}
+
+//4.加上@bean方法的形参
+@ServletComponentScan
+@EnableScheduling
+@SpringBootApplication
+public class TliasWebManagementApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(TliasWebManagementApplication.class, args);
+    }
+
+    @Bean
+    //AliyunOSSProperties不用@Autowired
+    public AliyunOSSOperator aliyunOSSOperator(AliyunOSSProperties ossProperties) {
+        return new AliyunOSSOperator(ossProperties);
+    }
+}
+```
