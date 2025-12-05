@@ -1,0 +1,121 @@
+# 基础知识
+## RESTFul
+- 每一个 URI 代表一种资源；
+- 客户端和服务器之间，传递这种资源的某种表现形式比如 json，xml，image,txt 等等；
+- 客户端通过特定的 HTTP 动词，对服务器端资源进行操作，实现"表现层状态转化"。
+## 状态码
+### 2xx：成功
+- 200 成功
+- 201 创建
+### 3xx：重定向
+- 301 永久重定向
+- 304 资源未修改
+### 4xx：客户端错误
+- 400 错误请求
+- 401 未授权
+- 403 禁止访问
+- 404 未找到
+- 405 请求方法不对
+### 5xx：服务器错误
+- 500 服务器错误
+- 502 网关错误
+- 504 网关超时
+## 软件开发
+- 需求分析：分析用户的需求，建立逻辑模型。
+- 软件设计：根据需求分析的结果对软件架构进行设计。
+- 编码：编写程序运行的源代码。
+- 测试 : 确定测试用例，编写测试报告。
+- 交付：将做好的软件交付给客户。
+- 维护：对软件进行维护比如解决 bug，完善功能。
+### 软件开发模型
+- 瀑布模型
+- 敏捷开发模型：把一个大项目分为多个相互联系，但也可独立运行的小项目，并分别完成，在此过程中软件一直处于可使用状态。
+## 代码命名
+### 大驼峰命名法
+- 每个英文单词开头大写
+- 类名
+```java
+ServiceDiscovery、ServiceInstance、LruCacheFactory
+```
+### 小驼峰命名法
+- 第一个英文单词小写
+- 方法名、参数名、成员变量、局部变量
+```java
+getUserInfo()
+createCustomThreadPool()
+setNameFormat(String nameFormat)
+Uservice userService
+```
+### 蛇形命名法
+- 用_进行英文单词链接
+- 测试方法名、常量、枚举名称
+```java
+@Test
+void should_get_200_status_code_when_request_is_valid() {
+  ......
+}
+```
+### 串式命名法
+- 用-进行英文单词链接
+- 项目文件夹名称
+
+### 其他
+- 包名统一使用小写，尽量使用单个名词作为包名，各个单词通过 "." 分隔符连接，并且各个单词必须为单数。
+```java
+org.apache.dubbo.common.threadlocal
+```
+- 抽象类命名使用 Abstract 开头。
+```java
+//为远程传输部分抽象出来的一个抽象类
+public abstract class AbstractClient extends AbstractEndpoint implements Client {
+
+}
+```
+- 异常类命名使用 Exception 结尾
+```java
+//自定义的 NoSuchMethodException（出处：Dubbo源码）
+public class NoSuchMethodException extends RuntimeException {
+    private static final long serialVersionUID = -2725364246023268766L;
+
+    public NoSuchMethodException() {
+        super();
+    }
+
+    public NoSuchMethodException(String msg) {
+        super(msg);
+    }
+}
+```
+- 测试类命名以它要测试的类的名称开始，以 Test 结尾
+```java
+//为 AnnotationUtils 类写的测试类（出处：Dubbo源码）
+public class AnnotationUtilsTest {
+  ......
+}
+```
+## Junit单元测试
+
+# 认证授权
+## RBAC模型
+- 给用户可以分配角色，给角色分配权限
+- 一般五张表，用户，角色，权限三张表，两张表用来记录用户有哪些角色，角色有哪些权限
+
+## SSO单点登录 
+- 用户一次就可以访问所有相互信任的应用系统
+*** 登陆 ***
+- 第一次访问，没AuthToken（存在cookie中），服务器返回登陆界面
+- 用户输入登录信息登录，SSO服务验证通过后往redis保存登录状态成功的数据，并向客户端下发AuthToken，将cookie的属性修改成对所有子域有效
+- 此后，对所有子域的访问都会带上AuthToken
+```
+登录主域https://reg.163.com，之后子域
+网易直播 https://v.163.com
+网易博客 https://blog.163.com
+网易花田 https://love.163.com
+都能访问
+```
+*** 登出 ***
+- 清除redis状态
+- 清除AuthToken(设置为过期)
+*** 跨域登录登出 ***
+* 已登录的跨域
+- 访问与主域不同的域 如主域https://reg.163.com 访问 https://www.kaola.com
