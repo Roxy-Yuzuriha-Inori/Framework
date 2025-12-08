@@ -1,6 +1,6 @@
 # lombok
 # JPA
-# 设计模式
+
 # Async 注解原理
 # bean的循环依赖
 # 自动装配
@@ -9,13 +9,20 @@
 # JWT问题实践
 # SSO单点登录实践
 # SSO跨域图解
-# 单元测试
+# JDBC-Mybatis(TypeHandlers（类型处理器）,objectFactory,plugins)
 
-# Mybatis,SpringSecurity,java8
-单元测试
-1.视频 https://www.bilibili.com/video/BV1yGydYEE3H?spm_id_from=333.788.videopod.episodes&vd_source=f33eee63f195f2aa5071789f26697edc&p=123<br>
-2.AOP,MCV,事务 https://javaguide.cn/system-design/framework/spring/spring-knowledge-and-questions-summary.html#spring-%E5%9F%BA%E7%A1%80<br>
-3.桌面四个word<br>
-4.IOC 事务 自动装配 https://javaguide.cn/system-design/framework/spring/ioc-and-aop.html<br>
-5.认证授权 https://javaguide.cn/system-design/security/basis-of-authority-certification.html<br>
-6.sql基础<br>
+# Mybatis,SpringSecurity,java8，单元测试，maven
+
+# Mysql
+# linux
+# 设计模式
+# Redis
+# MQ,Kafka
+# Nginx
+# 微服务
+# Docker K8s
+# CI/CD
+# 并发编程
+# JVM
+# 高可用高并发
+# 分布式

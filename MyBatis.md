@@ -193,18 +193,39 @@ arraylist	ArrayList
 collection	Collection
 iterator	Iterator -->
 
+<!-- ===========================      todolist  ========================================== -->
 <!-- ===========================  MyBatis类处理器typeHandlers  ========================================== -->
+    <typeHandlers>
+        <!-- 单个注册 -->
+        <typeHandler handler="com.example.handler.OrderStatusTypeHandler"/>
+        <!-- 批量注册包下所有类型处理器 -->
+        <package name="com.example.handler"/>
+    </typeHandlers>
+
 <!-- ===========================  MyBatis对象工厂objectFactory  ========================================== -->
 <!-- ===========================  MyBatis插件plugins  ========================================== -->
-<!-- ===========================  看不懂  ========================================== -->
+<!-- ===========================      todolist  ========================================== -->
 
 <!-- ===========================  MyBatis环境environments  ========================================== -->
 <!-- 配置多个环境下的mybatis，设置默认环境efault="development"，每个数据库对应一个 SqlSessionFactory 实例 -->
   <environments default="development">
   <!-- dev环境下的配置 -->
     <environment id="development">
-    <!--  -->
+
+    <!-- ===========================  MyBatis事务管理器transactionManager  =========================== -->
+    <!-- 事务管理器-单标签 -->
       <transactionManager type="JDBC"/>
+    <!-- 事务管理器-JDBC -->
+    <transactionManager type="JDBC">
+    <!-- 关闭自动提交事务 -->
+      <property name="skipSetAutoCommitOnClose" value="true"/>
+    </transactionManager>
+     <!-- 事务管理器-MANAGED -->  
+    <transactionManager type="MANAGED">
+        <!-- 可选属性：是否关闭连接（默认 false，由容器比如Spring的org.mybatis.spring.transaction.SpringManagedTransactionFactory管理） -->
+        <property name="closeConnection" value="false"/>
+    </transactionManager>
+    <!-- ===========================  MyBatis数据源dataSource  =========================== -->
       <dataSource type="POOLED">
       
       <!-- 先读properties内的proerty,再读properties属性写的外部配置文件，最后读方法形参进行一一覆盖 -->
@@ -225,4 +246,66 @@ iterator	Iterator -->
 String resource = "org/mybatis/example/mybatis-config.xml";
 InputStream inputStream = Resources.getResourceAsStream(resource);
 SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);
+
+
+/* ===========================  MyBatis类处理器typeHandlers(存疑，需要JDBC基础)  ========================================== */
+// 订单状态枚举
+public enum OrderStatus {
+    UNPAID(1, "未支付"),
+    PAID(2, "已支付"),
+    CANCELLED(3, "已取消");
+
+    private int code;
+    private String desc;
+
+    OrderStatus(int code, String desc) {
+        this.code = code;
+        this.desc = desc;
+    }
+
+    // 根据编码获取枚举
+    public static OrderStatus getByCode(int code) {
+      //枚举类静态方法values()，用于获取枚举类的数组 [UNPAID,PAID,CANCELLED]
+        for (OrderStatus status : values()) {
+            if (status.code == code) {
+                return status;
+            }
+        }
+        throw new IllegalArgumentException("无效的订单状态编码：" + code);
+    }
+
+    // getter/setter
+    public int getCode() { return code; }
+    public String getDesc() { return desc; }
+}
+
+// 自定义类型处理器  实现 org.apache.ibatis.type.TypeHandler 接口，或继承org.apache.ibatis.type.BaseTypeHandler
+public class OrderStatusTypeHandler extends BaseTypeHandler<OrderStatus> {
+    // 设置参数（Java 类型 → JDBC 类型）
+    @Override
+    public void setNonNullParameter(PreparedStatement ps, int i, OrderStatus parameter, JdbcType jdbcType) throws SQLException {
+        ps.setInt(i, parameter.getCode()); // 将枚举编码存入数据库
+    }
+
+    // 从结果集按列名获取值（JDBC 类型 → Java 类型）
+    @Override
+    public OrderStatus getNullableResult(ResultSet rs, String columnName) throws SQLException {
+        int code = rs.getInt(columnName);
+        return rs.wasNull() ? null : OrderStatus.getByCode(code);
+    }
+
+    // 从结果集按列索引获取值
+    @Override
+    public OrderStatus getNullableResult(ResultSet rs, int columnIndex) throws SQLException {
+        int code = rs.getInt(columnIndex);
+        return rs.wasNull() ? null : OrderStatus.getByCode(code);
+    }
+
+    // 从存储过程结果获取值
+    @Override
+    public OrderStatus getNullableResult(CallableStatement cs, int columnIndex) throws SQLException {
+        int code = cs.getInt(columnIndex);
+        return cs.wasNull() ? null : OrderStatus.getByCode(code);
+    }
+}
 ```
