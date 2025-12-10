@@ -10,7 +10,12 @@
         <artifactId>spring-context</artifactId>
        <!-- Version主版本号.次版本号.修订号     主版本号（模块的改变）次版本号（功能改变）修订号（改bug）-->    
         <version>6.1.4</version>
-        <!-- Scope  https://maven.apache.org/guides/introduction/introduction-to-dependency-mechanism.html#dependency-scope -->
+        <!-- Scope依赖范围，可选项 -->
+        <!-- scope值	主程序	测试程序	打包（运行）	范例
+           compile（默认）Y	       Y	       Y	      log4j
+             test	     -	      Y	          -	         junit
+           provided	     Y        Y	          -	      servlet-api
+            runtime      -	      Y	          Y	       jdbc驱动 -->
         <scope></scope>
             <!--排除依赖, 主动断开依赖的资源-->
         <exclusions>
