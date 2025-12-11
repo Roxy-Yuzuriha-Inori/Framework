@@ -10,19 +10,22 @@
 # SSO单点登录实践
 # SSO跨域图解
 # JDBC-Mybatis(TypeHandlers（类型处理器）,objectFactory,plugins)
+# Optional实践
 
-# Mybatis,SpringSecurity,java8，maven，MybatisPus,Optional
+# Mybatis实战
 
-# Mysql
-# linux
-# 设计模式
-# Redis
-# MQ,Kafka
-# Nginx
-# 微服务
-# Docker K8s
+# SpringSecurity,java8，maven 2h，MybatisPus 1h+整理
+
+# Mysql 21h
+# linux 27h
+# 设计模式 33h
+# Redis 42h
+# MQ,Kafka 12h
+# Nginx 4h
+# 微服务 
+# Docker K8s  8h
 # CI/CD
-# 并发编程
-# JVM
+# 并发编程 32h
+# JVM  68h
 # 高可用高并发
 # 分布式
