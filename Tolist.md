@@ -3,7 +3,7 @@
 
 # Async 注解原理
 # bean的循环依赖
-# 自动装配
+
 # 数据安全
 # AspectJ
 # JWT问题实践
@@ -11,7 +11,7 @@
 # SSO跨域图解
 # JDBC-Mybatis(TypeHandlers（类型处理器）,objectFactory,plugins)
 
-# Mybatis,SpringSecurity,java8，单元测试，maven
+# Mybatis,SpringSecurity,java8，maven，MybatisPus,Optional
 
 # Mysql
 # linux
