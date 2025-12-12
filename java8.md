@@ -104,128 +104,7 @@ optional.orElse("fallback");    // "bam"
 //ifPresent()：如果Optional实例有值则为其调用consumer，否则不做处理
 optional.ifPresent((s) -> System.out.println(s.charAt(0)));     // "b"
 ```
-# Stream
-## 创建流
-```java
-// 来自集合（最常用）
-List<String> list = Arrays.asList("a", "b", "c");
-Stream<String> s1 = list.stream();        // 顺序流
-Stream<String> s2 = list.parallelStream(); // 并行流（谨慎使用）
 
-// 来自数组
-String[] arr = {"x", "y", "z"};
-Stream<String> s3 = Arrays.stream(arr); // 或 Arrays.stream(arr, start, end)
-
-// 直接创建
-Stream<String> s4 = Stream.of("A", "B", "C");
-```
-## 操作
-- 中间操作：Filter(过滤)，Sorted(排序)，Map(映射)
-- 最终操作：Match(匹配),Count(计数),Reduce(规约),for each
-```java
-
-import java.util.*;
-import java.util.stream.*;
-import java.nio.charset.StandardCharsets;
-
-public class StreamDemo {
-    public static void main(String[] args) {
-        List<String> lines = Arrays.asList(
-            " Hello,   Stream! ",
-            "Java8 stream stream ",
-            "",
-            "Filter, MAP, flatMap & Reduce."
-        );
-
-        // =========================
-        // 例1：文本清洗与收集（中间操作 + 终止操作：collect）
-        // =========================
-        List<String> words = lines.stream()
-            // 中间：过滤空白行（惰性，不触发立即计算）
-            .filter(s -> !s.trim().isEmpty())
-            // 中间：peek 仅用于调试观察流中元素，避免依赖其副作用
-            .peek(s -> System.out.println("[peek] 原始行: " + s))
-            // 中间：每行按空白分词 -> 扁平化为一个统一的流（List<Stream<String>> -> Stream<String>）
-            .flatMap(s -> Arrays.stream(s.trim().split("\\s+")))
-            // 中间：规范化——去掉首尾标点并统一为小写
-            .map(w -> w.replaceAll("^[\\p{Punct}]+|[\\p{Punct}]+$", "")) // 去除标点
-            .map(String::toLowerCase)
-            // 中间：去重（依赖 equals/hashCode）
-            .distinct()
-            // 中间：排序——先按长度升序，再按字典序保证稳定性
-            .sorted(Comparator.comparingInt(String::length)
-                              .thenComparing(Comparator.naturalOrder()))
-            // 终止：收集为 List（触发整个流水线计算）
-            .collect(Collectors.toList());
-
-        System.out.println("清洗后的唯一单词：" + words);
-
-        // =========================
-        // 例2：词频统计（终止：collect(toMap) + 合并函数）
-        // =========================
-        Map<String, Long> freq = lines.stream()
-            .filter(s -> !s.trim().isEmpty()) // 中间
-            .flatMap(s -> Arrays.stream(s.trim().split("\\s+"))) // 中间
-            .map(w -> w.replaceAll("^[\\p{Punct}]+|[\\p{Punct}]+$", "").toLowerCase()) // 中间
-            // 终止：收集为 Map；重复键通过合并函数 Long::sum 累加计数
-            .collect(Collectors.toMap(
-                w -> w,     // key
-                w -> 1L,    // 初始值：每出现一次计数 +1
-                Long::sum   // 合并函数：遇到同一个 key 时累加
-            ));
-        System.out.println("词频：" + freq);
-
-        // =========================
-        // 例3：原始类型流与归约（终止：sum/average/reduce）
-        // =========================
-        int totalLen = words.stream()
-            .mapToInt(String::length) // 中间：映射到 IntStream，避免装箱/拆箱
-            .sum();                   // 终止：求和
-
-        double avgLen = words.stream()
-            .mapToInt(String::length) // 中间
-            .average()                // 终止：平均值（返回 OptionalDouble）
-            .orElse(0.0);             // 空流时给默认值
-
-        // 使用 reduce 做不可变的字符串拼接（演示归约）
-       // 字符串连接，concat = "ABCD"
-         String concat = Stream.of("A", "B", "C", "D").reduce("", String::concat);
-        // 求最小值，minValue = -3.0
-        double minValue = Stream.of(-1.5, 1.0, -3.0, -2.0).reduce(Double.MAX_VALUE, Double::min);
-        // 求和，sumValue = 10, 有起始值
-        int sumValue = Stream.of(1, 2, 3, 4).reduce(0, Integer::sum);
-        // 求和，sumValue = 10, 无起始值
-        sumValue = Stream.of(1, 2, 3, 4).reduce(Integer::sum).get();
-        // 过滤，字符串连接，concat = "ace"
-        concat = Stream.of("a", "B", "c", "D", "e", "F").
-         filter(x -> x.compareTo("Z") > 0).
-         reduce("", String::concat);
-        // =========================
-        // 例4：Top K（中间 + 终止）
-        // =========================
-        List<Map.Entry<String, Long>> top3 = freq.entrySet().stream()
-            .sorted(Map.Entry.<String, Long>comparingByValue().reversed()) // 中间：按频次降序
-            .limit(3)                                                      // 中间：截断 Top 3
-            .collect(Collectors.toList());                                 // 终止：收集
-        System.out.println("Top3 词频：" + top3);
-
-        // =========================
-        // 例5：其他终止操作（forEach / count / toArray）
-        // =========================
-        long count = words.stream().count(); // 终止：计数
-        System.out.println("单词数量：" + count);
-
-        // 终止：遍历（顺序保证用 forEachOrdered；普通 forEach 不保证顺序）
-        words.stream().forEachOrdered(w -> System.out.println("word=" + w));
-
-        // 终止：转数组
-        String[] arr = words.stream().toArray(String[]::new);
-        System.out.println("数组：" + Arrays.toString(arr));
-    }
-}
-
-```
-<!-- -------------------------          --------------------------------------- -->
 # Stream流
 ## 创建流
 ```java
@@ -321,4 +200,106 @@ String mergedString = strings.stream().filter(string -> !string.isEmpty()).colle
 System.out.println("合并字符串: " + mergedString);
 ```
 ### 统计
-https://www.runoob.com/java/java8-streams.html
+- summaryStatistics 先用mapToInt转换成对应类型，然后生成带有一系列方法的对象
+```java
+
+List<Integer> numbers = Arrays.asList(3, 2, 2, 3, 7, 3, 5);
+
+IntSummaryStatistics stats = numbers.stream()
+    .mapToInt(x -> x)             // 转为 IntStream（避免装箱/拆箱）
+    .summaryStatistics();          // 计算汇总统计
+
+System.out.println("列表中最大的数 : " + stats.getMax());
+System.out.println("列表中最小的数 : " + stats.getMin());
+System.out.println("所有数之和 : " + stats.getSum());
+System.out.println("平均数 : " + stats.getAverage());
+
+//Long/Double 与通用 Collectors
+LongSummaryStatistics longStats = longList.stream()
+    .mapToLong(x -> x)
+    .summaryStatistics();
+
+DoubleSummaryStatistics doubleStats = doubleList.stream()
+    .mapToDouble(x -> x)
+    .summaryStatistics();
+
+// 或者使用收集器：
+LongSummaryStatistics longStats2 = longList.stream()
+    .collect(Collectors.summarizingLong(Long::longValue));
+
+DoubleSummaryStatistics doubleStats2 = doubleList.stream()
+    .collect(Collectors.summarizingDouble(Double::doubleValue));
+
+```
+# 日期API
+## 本地化日期时间 API
+- LocalDate/LocalTime 和 LocalDateTime 类
+```java
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.LocalDateTime;
+import java.time.Month;
+ 
+public class Java8Tester {
+   public static void main(String args[]){
+      Java8Tester java8tester = new Java8Tester();
+      java8tester.testLocalDateTime();
+   }
+    
+   public void testLocalDateTime(){
+    
+      // 获取当前的日期时间
+      LocalDateTime currentTime = LocalDateTime.now();
+      System.out.println("当前时间: " + currentTime);  //当前时间: 2016-04-15T16:55:48.668
+        
+      LocalDate date1 = currentTime.toLocalDate();
+      System.out.println("date1: " + date1);     //date1: 2016-04-15
+        
+      Month month = currentTime.getMonth();
+      int day = currentTime.getDayOfMonth();
+      int seconds = currentTime.getSecond();
+        
+      System.out.println("月: " + month +", 日: " + day +", 秒: " + seconds);  //月: APRIL, 日: 15, 秒: 48
+        
+      LocalDateTime date2 = currentTime.withDayOfMonth(10).withYear(2012);
+      System.out.println("date2: " + date2);  //date2: 2012-04-10T16:55:48.668
+        
+      // 12 december 2014
+      LocalDate date3 = LocalDate.of(2014, Month.DECEMBER, 12);
+      System.out.println("date3: " + date3);   //date3: 2014-12-12
+        
+      // 22 小时 15 分钟
+      LocalTime date4 = LocalTime.of(22, 15);
+      System.out.println("date4: " + date4);   //date4: 22:15
+        
+      // 解析字符串
+      LocalTime date5 = LocalTime.parse("20:15:30");
+      System.out.println("date5: " + date5);    //date5: 20:15:30
+   }
+}
+```
+## 使用时区的日期时间API
+```java
+import java.time.ZonedDateTime;
+import java.time.ZoneId;
+ 
+public class Java8Tester {
+   public static void main(String args[]){
+      Java8Tester java8tester = new Java8Tester();
+      java8tester.testZonedDateTime();
+   }
+    
+   public void testZonedDateTime(){
+    
+      // 获取当前时间日期
+      ZonedDateTime date1 = ZonedDateTime.parse("2015-12-03T10:15:30+05:30[Asia/Shanghai]");
+      System.out.println("date1: " + date1);  //date1: 2015-12-03T10:15:30+08:00[Asia/Shanghai]
+        
+      ZoneId id = ZoneId.of("Europe/Paris");
+      System.out.println("ZoneId: " + id);  //ZoneId: Europe/Paris
+        
+      ZoneId currentZone = ZoneId.systemDefault();
+      System.out.println("当期时区: " + currentZone);  //当期时区: Asia/Shanghai
+   }
+}
+```
