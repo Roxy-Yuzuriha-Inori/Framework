@@ -4,6 +4,9 @@
 # Async 注解原理
 # bean的循环依赖
 
+# hutool工具类常用方法
+# Digest spring自带加密方法类
+
 # 数据安全
 # AspectJ
 # JWT问题实践
@@ -11,10 +14,9 @@
 # SSO跨域图解
 # JDBC-Mybatis(TypeHandlers（类型处理器）,objectFactory,plugins)
 # Optional实践
-
 # Mybatis实战
 
-# SpringSecurity,java8，maven 2h，MybatisPus 1h+整理
+# SpringSecurity,maven 2h，MybatisPus 1h+整理
 
 # Mysql 21h
 # linux 27h
