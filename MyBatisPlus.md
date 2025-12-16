@@ -533,9 +533,8 @@ public interface UserMapper extends BaseMapper<User> {
             @Param("username") String username // 查询条件
     );
 }
-步骤 2：定义 VO（视图对象，企业级：联查结果封装）
-java
-运行
+
+
 import lombok.Data;
 
 @Data
@@ -545,8 +544,8 @@ public class UserDeptVO {
     private Integer age;
     private String deptName; // 部门名称
 }
-步骤 3：Service 层实现自定义分页
-java
+
+//Service 层实现自定义分页
 运行
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
