@@ -1,12 +1,24 @@
 1. @TableField的用法
+```java
+ /*
+ value=""  对应表中列名
+ exist = false  表明该字段不在表中
+ fill = FieldFill.INSERT  自动填充，需要实现 MetaObjectHandler
+ */
+@TableField(value="user_id"，exist = false)
+ private Long id;
+```
 2. @EnableEncryptableProperties
+加密相关，默认自动开启
 3. @ConfigurationPropertiesScan
+配置文件注入的类不用写@Component
 4. Swagger
 5. Collections.emptyList(), CollectionUtils.containsAny，Collectors.groupingBy
+返回不可变的空 List；判断两者是否有交集（可用stream代替）；
 6. 全局异常拦截器  常见异常的输出日志信息方法 @Valid的MethodArgumentNotValidException异常
 7. 什么时候加事务@Transactional
 8. NPE预防x ：是包装类型 → 永远不要直接 !x、x && y；比较字符串 → 永远写 "xxx".equals(x)；判断空字符串 → 永远用 isEmpty / isBlank；判断集合空 → 永远用 CollectionUtils.isEmpty(list)；外部接口返回的对象字段 → 默认全部可能为 null
-9. 线程池ThreadPoolTaskExecutor和@Async
+9.  线程池ThreadPoolTaskExecutor和@Async
 10. 将前端传来的对象build另外一个对象，脱敏取关键值
 11. Spring Security的passwordEncoder 
 12. Caffeine  二级缓存 + Redis
@@ -15,6 +27,7 @@
 15. TransactionTemplate 
 16. 分组校验 validator.validate()
 17. Apache Commons Range 做区间判断
+
 18. 
 19. # lombok
 # JPA
@@ -42,10 +55,12 @@
 # Redis 42h
 # MQ,Kafka 12h
 # Nginx 4h
-# 微服务 
+# 微服务 44h
 # Docker K8s  8h
 # CI/CD
 # 并发编程 32h
 # JVM  68h
 # 高可用高并发
 # 分布式
+
+# Easy Excel
