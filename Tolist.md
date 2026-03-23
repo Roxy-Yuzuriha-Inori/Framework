@@ -133,8 +133,299 @@ public class Test {
 
 ## 8.Java 方法重载和方法重写之间的区别是什么？
 1. 重载 返回类型可以不同 形参必须不同 可以重载静态方法 修饰符不受限制
-2. 重写 返回类型必须相同或者返回父类的子类 形参必须相同 不能重写静态方法（静态属于类级） 修饰符不能超过父类范围
-3. 
+2. 重写 返回类型必须相同或者返回父类的子类 形参必须相同 不能重写静态方法（静态属于类级） 修饰符不能比父类更严格
+
+## 9.什么是 Java 内部类？它有什么作用？
+1. 成员内部类
+```java
+public class OuterClass {
+    private String outerField = "Outer Field";
+
+    class InnerClass {
+        void display() {
+            //可以访问外部类所有成员
+            System.out.println("Outer Field: " + outerField);
+        }
+    }
+   
+    public void createInner() {
+        InnerClass inner = new InnerClass();
+        inner.display();
+    }
+}
+ //需要通过外部实例创建
+OuterClass outer = new Outer();
+OuterClass.InnerClass inner = outer.new InnerClass();
+``
+```
+2. 静态内部类
+```java
+public class OuterClass {
+    private static String staticOuterField = "Static Outer Field";
+    //只能访问外部类的静态成员
+    static class StaticInnerClass {
+        void display() {
+            System.out.println("Static Outer Field: " + staticOuterField);
+        }
+    }
+
+    public static void createStaticInner() {
+        StaticInnerClass staticInner = new StaticInnerClass();
+        staticInner.display();
+    }
+}
+//不需要通过外部实例创建，直接new
+OutClass.StaticInnerClass inner = new OuterClass.StaticInnerClass()
+```
+3. 局部内部类
+```java
+class Outer {
+    void test() {
+        //定义在方法内的内部类
+        class Inner {
+            void show() {
+                //能访问方法中的 final 或 effectively final 局部变量 或 外部类所有成员
+                System.out.println("local inner");
+            }
+        }
+        new Inner().show();
+    }
+}
+```
+4. 匿名内部类
+```java
+public class OuterClass {
+    interface Greeting {
+        void greet();
+    }
+
+    public void sayHello() {
+        //没有类名，通常实现接口或继承抽象类
+        Greeting greeting = new Greeting() {
+            //能访问方法中的 final 或 effectively final 局部变量 或 外部类所有成员
+            @Override
+            public void greet() {
+                System.out.println("Hello, World!");
+            }
+        };
+        greeting.greet();
+    }
+}
+
+```
+```java
+//Lambda表达式写匿名内部类
+// 匿名内部类写法
+Runnable r1 = new Runnable() {
+    @Override
+    public void run() {
+        System.out.println("Hello");
+    }
+};
+
+// Lambda 写法
+Runnable r2 = () -> System.out.println("Hello");
+```
+
+## 10.Java8 有哪些新特性？
+ java8.md
+引入元空间代替永久代
+
+## 11.Java11 有哪些新特性？
+1. 标准化Http客户端API
+2. String方法增强
+```java
+//1.isBlank和isEmpty区别
+//isEmpty() —— 判断字符串长度是否为 0
+"".isEmpty();        // true
+"  ".isEmpty();      // false（因为长度是 2）
+//isBlank() —— 判断是否只包含空白
+"".isBlank();        // true
+"  ".isBlank();      // true（只有空格，也算 blank）
+"\t\n".isBlank();    // true（tab、换行 都算 blank）
+
+//2.strip()和trim()区别
+//strip()去掉所有 Unicode 空白 而 trim()只去 ASCII 空白
+
+//3.lines() 分割参照：字符串中的“行终止符”：\n、\r、\r\n
+// 将字符串按行分割成 Stream
+multiLine.lines()
+    .map(line -> "处理: " + line)
+    .forEach(System.out::println);
+
+long lineCount = multiLine.lines().count();
+System.out.println("总行数: " + lineCount);
+
+//repeat()
+System.out.println("Java ".repeat(3)); // "Java Java Java "
+System.out.println("=".repeat(50));    // 50个等号
+System.out.println("*".repeat(0));     // 空字符串
+```
+3. File文件读写简化
+```java
+// 写入文件
+String content = "这是一个测试文件\n包含多行内容\n中文支持测试";
+//参数：路径，内容，编码 返回值：路径
+Path tempFile = Files.writeString(
+    Paths.get("temp.txt"), 
+    content,
+    StandardCharsets.UTF_8
+);
+
+// 读取文件
+//参数：路径，编码  返回值：内容
+String readContent = Files.readString(tempFile, StandardCharsets.UTF_8);
+System.out.println("读取的内容:\n" + readContent);
+```
+```java
+//读取大文件：流式处理
+try (Stream<String> lines = Files.lines(tempFile)) {
+    lines.filter(line -> !line.isBlank())
+         .map(String::trim)
+         .forEach(System.out::println);
+}
+
+```
+4. Optional新增isEmpty
+## 12.Java17 有哪些新特性？
+1. Sealed密封类:控制类的继承
+```java
+//父类
+public sealed class Shape 
+    // 只允许这三个类继承
+    permits Circle, Rectangle, Triangle {
+}
+//子类继承后要选择一种继承策略
+//final:该子类不能再被继承了
+public final class Circle extends Shape {
+}
+
+//sealed：和父类一样选择谁能继承我
+public sealed class Triangle extends Shape 
+    permits RightTriangle {
+}
+
+//non-sealed：谁都能继承我
+public non-sealed class Rectangle extends Shape {
+}
+```
+2. 增强的伪随机数生成器
+3. 强封装JDK内部API:彻底禁止通过反射访问JDK内部类
+## 13.Java21 有哪些新特性？
+1. Virtual Threads虚拟线程
+只要发生线程等待，该线程就可以去执行其他的任务，适用于高并发，IO密集型任务
+2. Switch模式匹配
+```java
+//原来代码
+public String processMessage(Object message) {
+    if (message instanceof String) {
+        String textMessage = (String) message;
+        return "文本消息：" + textMessage;
+    } else if (message instanceof Integer) {
+        Integer numberMessage = (Integer) message;
+        return "数字消息：" + numberMessage;
+    } else if (message instanceof List) {
+        List<?> listMessage = (List<?>) message;
+        return "列表消息，包含 " + listMessage.size() + " 个元素";
+    } else {
+        return "未知消息类型";
+    }
+}
+//Switch模式匹配：匹配类型，若是赋值给形参执行逻辑
+public String processMessage(Object message) {
+    return switch (message) {
+        case String text -> "文本消息：" + text;
+        case Integer number -> "数字消息：" + number;
+        case List<?> list -> "列表消息，包含 " + list.size() + " 个元素";
+        case null -> "空消息";
+        default -> "未知消息类型";
+    };
+}
+// 增加判断条件：根据字符串长度采用不同处理策略
+public String processText(String text) {
+    return switch (text) {
+        case String s when s.length() < 10 -> "短文本：" + s;
+        case String s when s.length() < 100 -> "中等文本：" + s.substring(0, 5);
+        case String s -> "长文本：" + s.substring(0, 10);
+    };
+}
+
+```
+3. Record模式
+```java
+//定义record
+public record Person(String name, int age) {}
+public record Address(String city, String street) {}
+public record Employee(Person person, Address address, double salary) {}
+//类型判断同时进行赋值解构
+public String analyzeEmployee(Employee emp) {
+    return switch (emp) {
+        // 一次性提取所有需要的信息
+        case Employee(Person(var name, var age), Address(var city, var street), var salary) 
+            when salary > 50000 -> 
+            String.format("%s（%d岁）是高薪员工，住在%s%s，月薪%.0f", 
+                         name, age, city, street, salary);
+        case Employee(Person(var name, var age), var address, var salary) -> 
+            String.format("%s（%d岁）月薪%.0f，住在%s", 
+                         name, age, salary, address.city());
+    };
+}
+```
+4. 有序集合
+```java
+//补充几个集合方法
+List<String> tasks = new ArrayList<>();
+tasks.addFirst("鱼皮的任务");    // 添加到开头
+tasks.addLast("小阿巴的任务");   // 添加到结尾
+
+String firstStr = tasks.getFirst();  // 获取第一个
+String lastStr = tasks.getLast();   // 获取最后一个
+
+String removedFirst = tasks.removeFirst();  // 删除并返回第一个
+String removedLast = tasks.removeLast();    // 删除并返回最后一个
+
+List<String> reversed = tasks.reversed();   // 反转列表
+```
+5. 分代ZGC
+分年轻代和老年代（短命区和长寿区）
+
+## 14.Java 中 String、StringBuffer 和 StringBuilder 的区别是什么？
+1. 字符串基本不变，只有少量拼接，用String
+2. 多线程环境频繁修改字符串，用StringBuffer    线程安全 synchronized加在了整个方法上
+3. 单线程下大量拼接操作，用StringBuilder      
+```java
+//java编译器会将简单的字符串拼接优化成StringBuilder  但是在循环中则会反复创建新的StringBuilder  
+String s = "";
+for (int i = 0; i < 1000; i++) {
+    s += i;   // 为什么不推荐？
+}
+//正确做法
+StringBuilder sb = new StringBuilder();
+for (int i = 0; i < 1000; i++) {
+    sb.append(i);
+}
+String s = sb.toString();
+```
+4. 其他：JDK9之后这三个底层的char数字全换成了byte数组，同时加了个coder字段标记编码方式
+
+### 为什么String不可变
+1. 字符串常量池能生效，JVM专门开了一篇区域存字符串常量，一旦可变，别的引用指向的内容一同会变
+2. 哈希值可以缓存
+3. 天然线程安全
+
+## 15.Java 的 StringBuilder 是怎么实现的？
+```java
+abstract class AbstractStringBuilder {
+    char[] value;  // 可扩容字符数组
+    int count;     // 实际存了多少个字符
+}
+```
+### 添加方法append流程
+1. 计算要添加的长度
+2. 判断容量够不够
+3. 不够进行扩容  乘2加2 降低频繁触发扩容数组拷贝
+4. 够将内容拷贝到数组中
+5. 更新count
 
 # JVM基础
 ## 编译，编译型与解释型语言
