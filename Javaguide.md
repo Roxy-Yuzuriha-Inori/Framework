@@ -215,3 +215,67 @@ public class TliasWebManagementApplication {
 3. DispatcherServlet 调用 HandlerAdapter适配器执行 Handler 。<br>
 4. Handler 完成对用户请求的处理后，会返回一个 ModelAndView 对象给DispatcherServlet。前后端分离到这返回一个JSON<br>
 5. ModelAndView 顾名思义，包含了数据模型以及相应的视图的信息。Model 是返回的数据对象，View 是个逻辑上的 View。ViewResolver 会根据逻辑 View 查找实际的 View。DispaterServlet 把返回的 Model 传给 View（视图渲染）。把 View 返回给请求者（浏览器）
+
+## 17.MySQL事务是怎么实现的
+事务 AIDC
+redo log:保证持久性
+undo log:保证原子性
+锁：保证隔离性
+MCVV：保证隔离性的读写并发
+一致性：由其他性共同实现
+### redo log （Duration）
+#### 参考：https://juejin.cn/post/7213296062085644344
+1. WAL策略（Write ahead logging）：先写日志再写数据
+2. 两个指针，write pos指向日志写到哪了，checkpoint指向已经刷盘的位置，两指针中间是待刷盘的脏数据
+3. 流程
+SQL
+ ↓
+undo log（回滚用）
+ ↓
+数据页改内存    InnoDB 内存里改数据页
+ ↓
+redo log 生成
+ ↓
+redo buffer(InnoDB 内存)
+ ↓
+commit 时：
+   → write redo log
+   → （由 innodb_flush_log_at_trx_commit 控制）
+ ↓
+返回成功 
+ ↓
+后台慢慢刷数据页
+4. innodb_flush_log_at_trx_commit   
+write: Redo Log Buffer → OS Page Cache
+fsync(刷盘)：把 OS Page Cache 里的日志强制同步到物理磁盘
+
+0：提交事务时，不做 write + fsync；
+后台线程大约每秒做一次日志写出并同步（因此最多可能丢失约 1 秒事务）
+优点：性能最高。
+风险：实例崩溃时可能丢失最多1秒的事务数据。
+
+1（默认值）：每次提交都 write + fsync
+优点：完全遵守ACID特性，数据安全性最高。
+缺点：性能开销较大，尤其在高并发场景下。
+
+2：每次提交只 write 到 OS Cache，每秒 fsync
+优点：性能优于1，数据安全性高于0。
+风险：实例崩溃时可能丢失最近1秒内的事务数据。
+
+0:延迟写。效率最高,最不安全:log_buff  —> 每隔1秒   —>  os cache  —>实时---—>  disk
+1:实时写,实时刷。效率最低,最安全:log_buff  —>   实时    —>  os cache  —>实时---—>  disk
+2:实时写,延迟刷。效率折中,安全折中:log_buff  —>   实时    —>  os cache  —>每隔1秒—>  disk
+
+### undo log
+每条数据有两个隐藏字段
+trx_id 指向最后修改这条记录的事务的id
+roll pointer 指向上一个版本
+
+```txt
+初始张三，事务100改成李四，事务200改成王五
+当前数据页：name='王五', trx_id=200, roll_pointer →
+    undo log：name='李四', trx_id=100, roll_pointer →
+        undo log：name='张三', trx_id=0, roll_pointer=null
+```
+
+## 18.长事务会导致什么问题
