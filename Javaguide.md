@@ -294,6 +294,37 @@ roll pointer 指向上一个版本
 
 ## 19.MVCC
 多版本并发控制 
+###  脏读 / 不可重复读 / 幻读
+脏读：一个事务读到了另一个事务“尚未提交”的数据
+不可重复读：同一个事务内，对同一行数据两次查询，结果不一致 （能读到其他事务对 同行数据 的修改）
+幻读：同一个事务内，用同样的条件查询，两次结果集“行数变了” （能读到其他事务对 行数 的修改）
+### 快照读和当前读
+快照读：不加锁的select，走MVCC，通过 Read View 从版本链中选择可见版本。
+当前读：加锁的select和增删改，直接读取最新已提交数据，不走MVCC
+### 隔离级别
+图：https://www.mianshiya.com/bank/1791003439968264194/question/1780933295484203009#heading-9
+### Read View（
+用于判断当前事务读取的版本链（undo log）是否可见
+
+Read View = {
+    creator_trx_id    // 当前事务ID
+    m_ids             // 正在执行，还没提交的事务集合
+    min_trx_id        // m_ids 中最小的
+    max_trx_id        // 系统即将分配的下一个事务ID
+}
+#### 可见性判断规则，事务对应版本
+1. trx_id == creator_trx_id   undo log的版本id和当前事务一致，可见
+2. trx_id < min_trx_id        执行完毕的事务，可见
+3. trx_id ∈ m_ids             活跃事务，不可见
+4. trx_id >= max_trx_id       未来事务，不可见
+
+### RC与RR
+RC 每次 SELECT 都创建新的 Read View，所以可能读到新数据 → 不可重复读
+RR 只在事务中第一次执行的“普通 SELECT（快照读）创建 Read View，所以一直读同一个版本 → 可重复读 
+
+### todo RR与幻读
+
+## 20.锁
 
 
 
