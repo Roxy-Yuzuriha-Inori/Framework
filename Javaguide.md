@@ -216,6 +216,13 @@ public class TliasWebManagementApplication {
 4. Handler 完成对用户请求的处理后，会返回一个 ModelAndView 对象给DispatcherServlet。前后端分离到这返回一个JSON<br>
 5. ModelAndView 顾名思义，包含了数据模型以及相应的视图的信息。Model 是返回的数据对象，View 是个逻辑上的 View。ViewResolver 会根据逻辑 View 查找实际的 View。DispaterServlet 把返回的 Model 传给 View（视图渲染）。把 View 返回给请求者（浏览器）
 
+## 16.MySQL 中的日志类型有哪些？binlog、redo log 和 undo log 的作用和区别是什么？
+redo log:记录数据在页的修改，保证数据不丢失，循环写（写满从头覆盖）
+undo log:记录旧值，用于回滚，随事物变化形成版本链
+binlog:记录sql操作，用于主从同步，Server层日志，追加写
+
+顺序：先改内存数据，然后写redo日志，再去修改磁盘
+
 ## 17.MySQL事务是怎么实现的
 事务 AIDC
 redo log:保证持久性
@@ -279,3 +286,26 @@ roll pointer 指向上一个版本
 ```
 
 ## 18.长事务会导致什么问题
+锁竞争激烈，容易死锁，undo log膨胀，主从延迟
+
+### 删除大量数据
+1. 根据问题查出记录的索引，走索引删
+2. 将要的数据插入到新表
+
+## 19.MVCC
+多版本并发控制 
+
+
+
+
+
+
+
+
+
+
+
+数据结构，redo log流程图，锁
+## 临时设置环境变量
+$env:JIB_USERNAME="clu57"
+$env:JIB_PASSWORD="x"
