@@ -322,7 +322,34 @@ Read View = {
 RC 每次 SELECT 都创建新的 Read View，所以可能读到新数据 → 不可重复读
 RR 只在事务中第一次执行的“普通 SELECT（快照读）创建 Read View，所以一直读同一个版本 → 可重复读 
 
-### todo RR与幻读
+
+### RR与幻读 todo 修改并指出错误，分清楚是几个事务，列出可能的情况
+RR理论不能完全避免幻读，但innodb默认有间隙锁
+```sql
+--事务开始
+BEGIN
+
+--语句一
+SELECT * FROM orders WHERE amount > 100
+--语句二
+SELECT * FROM orders WHERE amount > 100 for update
+
+--语句三
+-- 当前读，所加在外部的事务上
+UPDATE orders SET amount=150 WHERE id=2;
+
+
+--语句四
+SELECT * FROM orders WHERE amount > 100
+--语句五
+SELECT * FROM orders WHERE amount > 100 for update
+COMMIT
+
+```
+1. 一三四，RR情况下，语句一和语句三是可以并发执行的，因为语句一是快照读，语句三是当前读。然后语句四继续读的是快照版本，所以不会产生幻读
+2. 一三五，语句五变成了当前读，读最新的数据，会发生类似幻读，五是单独事务
+3. 二三四，语句二会加间隙锁，导致语句三阻塞无法修改，语句四再去查还是原来的数据，不会产生幻读；就算语句四在语句三之后执行，如果之前有快照版本，语句四查的是快照版本，语句三不会产生影响，如果之前没有快照版本，语句四能查到语句三的修改，但这是新的快照，不能称之为幻读。
+4. 二三五，二和五可以一起执行，不会出现幻读；就算五再三后执行，因为不是同一个事务，只能是类似幻读。
 
 
 ## 20.锁
@@ -410,9 +437,42 @@ SELECT * FROM (
 ```
 ### 悲观锁和乐观锁
  悲观锁：先假设一定会冲突，先加锁再操作
+ ```sql
+-- 悲观锁示例：扣减库存
+BEGIN;
+-- FOR UPDATE先锁住这行，别人想改就得等
+SELECT stock FROM products WHERE id = 1 FOR UPDATE;
+-- 业务判断库存够不够
+-- 扣减库存
+UPDATE products SET stock = stock - 1 WHERE id = 1;
+COMMIT;
+ ```
  乐观锁：假设大概率不冲突，先操作，冲突了再处理
+```sql
+-- 1.读取数据和版本号
+SELECT id, name, stock, version FROM products WHERE id = 1;
+-- 假设读出来 version = 5
+
+-- 更新时带上版本号
+UPDATE products
+SET stock = stock - 1, version = version + 1
+WHERE id = 1 AND version = 5;
+
+-- 检查影响行数
+-- 如果返回 0 说明被别人改过，需要重试或报错
+
+-- 2.假设读出来 stock = 100,存在ABA问题
+UPDATE products
+SET stock = 99
+WHERE id = 1 AND stock = 100;
+```
 
 ### 死锁
+满足条件：互斥条件，请求并持有，不可剥夺，循环等待
+1. innodb会自动检测死锁，回滚代价最小事务；
+2. 设置锁等待超时，超时后锁自动放弃并回滚 SET innodb_lock_wait_timeout = 5;
+3. 手动查看信息，杀死事务 SHOW ENGINE INNODB STATUS;
+4. 拆分事务，按顺序
 
 
 
