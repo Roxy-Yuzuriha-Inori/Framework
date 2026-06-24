@@ -755,6 +755,272 @@ id | name | order | status
 3NF：非主键之间不能互相依赖（消除传递依赖）
 
 ## 34.在 MySQL 中，你使用过哪些函数？
+### 字符串函数
+```sql
+-- 1 拼接
+SELECT CONCAT('Hello', ' ', 'World');
+-- Hello World
+
+-- 2️ 子串
+SELECT SUBSTRING('abcdef', 1, 3);
+-- abc
+
+-- 3 长度
+SELECT LENGTH('abc');       -- 字节长度
+SELECT CHAR_LENGTH('abc');  -- 字符长度
+
+-- 4 去空格
+SELECT TRIM('  hello  ');
+
+-- 5 替换
+SELECT REPLACE('hello world', 'world', 'mysql');
+
+-- 6 大小写
+SELECT LOWER('ABC');
+SELECT UPPER('abc');
+```
+### 数值函数
+```sql
+-- 1 四舍五入
+SELECT ROUND(3.1415, 2);  -- 3.14
+
+-- 2 向上 / 向下取整
+SELECT CEIL(3.1);   -- 4
+SELECT FLOOR(3.9);  -- 3
+
+-- 3 绝对值
+SELECT ABS(-10);  -- 10
+
+-- 4 随机数
+SELECT RAND();
+```
+### 日期函数
+```sql
+--1 当前时间
+SELECT NOW();        -- 当前时间
+SELECT CURDATE();    -- 当前日期
+SELECT CURTIME();    -- 当前时间（时分秒）
+
+--2 日期加减
+SELECT DATE_ADD(NOW(), INTERVAL 1 DAY);
+SELECT DATE_SUB(NOW(), INTERVAL 1 DAY);
+
+--3 计算时间差
+SELECT DATEDIFF('2026-06-22', '2026-06-20'); -- 2天
+
+--4 格式化时间
+SELECT DATE_FORMAT(NOW(), '%Y-%m-%d %H:%i:%s');
+
+--5 提取时间字段
+SELECT YEAR(NOW());
+SELECT MONTH(NOW());
+SELECT DAY(NOW());
+```
+### 聚合函数
+```sql
+--1 COUNT
+SELECT COUNT(*) FROM user;
+
+--2 SUM
+SELECT SUM(amount) FROM orders;
+
+--3 AVG
+SELECT AVG(score) FROM student;
+
+--4 MAX / MIN
+SELECT MAX(price), MIN(price) FROM goods;
+
+--5 GROUP_CONCAT
+SELECT class, GROUP_CONCAT(name)
+FROM student
+GROUP BY class;
+--把多行数据拼接成一行字符串
+--按class分组，所以name列展示在class一行
+
+--GROUP BY name = 把相同 name 的数据分组，用于统计或去重
+```
+### 流程控制函数
+```sql
+--1 IF
+SELECT IF(score > 60, '及格', '不及格') FROM student;
+
+--2 CASE
+SELECT
+  CASE 
+    WHEN score >= 90 THEN '优秀'
+    WHEN score >= 60 THEN '及格'
+    ELSE '不及格'
+  END
+FROM student;
+--3 IFNULL
+SELECT IFNULL(score, 0) FROM student;
+-- 如果为 NULL → 用默认值
+```
+### 窗口函数
+窗口函数是在“保留原始行”的情况下，对数据进行分组计算的函数
+```sql
+函数() OVER (
+    PARTITION BY 分组字段
+    ORDER BY 排序字段
+)
+
+--1 ROW_NUMBER（行号）
+SELECT name, score,
+       ROW_NUMBER() OVER (ORDER BY score DESC) AS rn
+FROM student;
+--每行按 score 排序，rn列1,2,3,4...（没有重复）
+
+--2 RANK（排名）
+SELECT name, score,
+       RANK() OVER (ORDER BY score DESC)
+FROM student;
+-- 并列名次相同，下一名跳号
+
+--3 DENSE_RANK（排名 不跳号）
+SELECT name, score,
+       DENSE_RANK() OVER (ORDER BY score DESC)
+FROM student;
+
+--4 SUM / AVG（窗口聚合）
+SELECT name, class, score,
+       AVG(score) OVER (PARTITION BY class)
+FROM student;
+-- 每个班级平均分（但保留每行）
+
+--5 累加（加上当前行）
+SELECT name, score,
+       SUM(score) OVER (ORDER BY score)
+FROM student;
+
+--6 LAG / LEAD（前后行对比)
+SELECT name, score,
+       LAG(score) OVER (ORDER BY score)
+FROM student; --上一行
+
+SELECT name, score,
+       LEAD(score) OVER (ORDER BY score)
+FROM student; --下一行
+
+--例：每个班级前2名
+SELECT *
+FROM (
+    SELECT *,
+           ROW_NUMBER() OVER (PARTITION BY class ORDER BY score DESC) AS rn
+    FROM student
+) t
+WHERE rn <= 2;
+
+--PARTITION BY（分组窗口）
+相同的class单独排名
+| name | class | score | rk |
+| ---- | ----- | ----- | -- |
+| A    | 1     | 100   | 1  |
+| B    | 1     | 100   | 1  |
+| C    | 1     | 90    | 3  |
+| D    | 2     | 95    | 1  |
+| E    | 2     | 80    | 2  |
+```
+
+## 35.数据类型
+### text
+1. 存在外部页，多io
+2. 存不确定长度的数据，如文章描述
+### varchar(n)
+1. 变长 长度标识（1（<=255字节）或2字节） + 实际数据
+2. 前缀索引：如果字符串太长可取前面几个字段作为索引
+3. n代表字符，限制大小按字节算  
+4. 排序，分组，创建临时表会按 字段定义的最大值 分配空间，所以要定得合理
+### 主键索引
+1. 自增索引可直接用bigint，int满了会报错
+2. 可用分布式id作为主键
+### 支付金额
+1. BIGINT
+- 一般存到分 10.23元 → 存 1023
+- 比DECIMAL快，存储空间小
+- java里面对应用long
+1. DECIMAL
+- DECIMAL(M,D) M是总位数，D是小数位数
+- 普通金额用DECIMAL(18,2)，费率计算DECIMAL(18,4)
+- java里面对应用BigDecimal
+```java
+// 创建 BigDecimal 禁止用 double 构造器
+BigDecimal bad = new BigDecimal(0.1);   // 精度已经丢了
+BigDecimal good = new BigDecimal("0.1"); // 字符串构造，精确
+
+// 除法必须指定精度和舍入模式
+BigDecimal result = a.divide(b, 2, RoundingMode.HALF_UP);
+
+// 比较用 compareTo，不要用 equals
+// equals 会比较精度，1.0 和 1.00 不相等
+if (a.compareTo(b) == 0) { ... }
+```
+### 大音视频
+1. BLOB = Binary Large Object （二进制大对象）
+2. 存的是“二进制数据”
+3. 行内存指针 ， 真实数据存在行外页  ， 意味着更多io
+4. 单一个数据太大，影响bufferPool,binlog（insert长长的二进制数据）
+5. 推荐阿里云OSS等
+
+### 视图
+1. 相当于带名字的select语句
+2. 不存真实数据，调用视图相当于调用创建视图的select语句
+3. 用于复杂报表查询，权限控制（视图中只展示可展示的列）
+4. 满足1.基于单表，没有join 2. 没有聚合函数 3.没有子查询 4.没有表达式和计算列 可更新（insert,update,delete）视图里的数据，一般视图作为只读
+5. 分布式用不到
+
+### 游标
+1. 用于个性化处理每行数据
+2. mysql搭配存储过程
+3. 性能差
+```sql
+-- 修改分隔符  默认 SQL 结束符是 ; 存储过程内部也有 ; 会冲突 
+DELIMITER //
+CREATE PROCEDURE adjust_salary()
+-- 存储过程的代码开始
+BEGIN
+    -- 声明变量
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE emp_id INT;
+    DECLARE emp_salary DECIMAL(10,2);
+
+    -- 1.声明游标，指定要遍历的结果集
+    DECLARE salary_cursor CURSOR FOR
+        SELECT id, salary FROM employees WHERE department = 'tech';
+    -- 遍历结束时的处理器：当 FETCH 没有数据时（读取到末尾），自动执行done = TRUE ，防止游标读完数据 报 NOT FOUND
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+    --2.打开游标
+    OPEN salary_cursor;
+    --定义一个循环（名字叫 read_loop）
+    read_loop: LOOP
+        -- 3.从游标取一行数据
+        FETCH salary_cursor INTO emp_id, emp_salary;
+
+        --如果已经没有数据了，跳出循环
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+
+        -- 对每一行做业务逻辑，比如涨薪 10%
+        UPDATE employees SET salary = emp_salary * 1.1 WHERE id = emp_id;
+    END LOOP;
+    -- 4.关闭游标
+    CLOSE salary_cursor;
+END //
+DELIMITER ;
+```
+## 36.在什么情况下，不推荐为数据库建立索引？
+1. 数据量很小的表（千百）
+2. 写入频繁的表
+3. 区分度低的字段（男女）
+4. 查询操作不会用到的字段
+5. 大字段
+
+### 索引的维护成本
+1. insert  涉及到主键，要更新所有索引树
+2. update  涉及到的索引要更新索引树，如果涉及主键全要更新（二级索引树里存主键），先删除原来索引再插入新的
+3. delete  标记删除，后续清理
+
+## 37.MySQL 中 EXISTS 和 IN 的区别是什么？
 
 
 
