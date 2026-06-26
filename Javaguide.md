@@ -1021,6 +1021,47 @@ DELIMITER ;
 3. delete  标记删除，后续清理
 
 ## 37.MySQL 中 EXISTS 和 IN 的区别是什么？
+```sql
+-- EXISTS 写法：外表 mianshiya 小，子查询 order 大
+-- 用外表m一条条去子表里查， 找到就停止
+SELECT * FROM mianshiya m
+WHERE EXISTS (SELECT 1 FROM `order` o WHERE m.user_id = o.user_id);
+
+-- IN 写法：子查询 order 小，外表 mianshiya 大
+-- 先执行子查询内表，把结果放到临时集合里，再去和 外表 比较
+SELECT * FROM mianshiya
+WHERE user_id IN (SELECT user_id FROM `order`);
+```
+- in碰上为null的数据会有问题
+```sql
+-- 假设 order 表有一行 user_id = NULL  查询外表不在内表的id
+SELECT * FROM mianshiya WHERE user_id NOT IN (SELECT user_id FROM `order`);
+-- 结果：空！一行都没有  
+-- 因为外表的id比较内表的null时，返回的是unknown，而not in需要都返回false，所以外表id一个都查不到
+```
+
+## 38.如何实现数据库的不停服迁移？
+1. 建从库作为新库
+2. 双写：从库和新库一起更新  （事务一致性，幂等性，先写旧库，同步延迟）
+3. 灰度切流：从主要读旧库慢慢切换到读新库
+
+## 39.MySQL 数据库的性能优化方法有哪些？
+1. SQL 优化  select*  limit 1000,10
+2. 索引优化   联合索引，索引失效
+3. 表结构设计  合适的类型和大小  主键  分表
+4. 架构优化   读写分离 分库分表  redis缓存
+5. 参数与系统优化  缓存池参数   binlog   慢查询日志
+
+## 40.MySQL 的查询优化器如何选择执行计划？
+
+
+## 41.逻辑删除
+问题：唯一主键可能发生重复  比如 email为唯一索引 新加 - 删除（改is_delete）- 再加 重复的email不满足唯一性
+
+1. is_delete不用0，1  删除的改成时间或者主键id填充
+2. 反复修改同一条记录，但需要  流水表  记录操作
+
+
 
 
 
