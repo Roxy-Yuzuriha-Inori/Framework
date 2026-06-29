@@ -1053,6 +1053,8 @@ SELECT * FROM mianshiya WHERE user_id NOT IN (SELECT user_id FROM `order`);
 5. 参数与系统优化  缓存池参数   binlog   慢查询日志
 
 ## 40.MySQL 的查询优化器如何选择执行计划？
+1. 解析阶段 -> 预处理阶段 -> 优化阶段
+2. 优化阶段会计算成本，成本：I/O成本（处理多少页）和CPU成本（读多少行）
 
 
 ## 41.逻辑删除
@@ -1061,8 +1063,66 @@ SELECT * FROM mianshiya WHERE user_id NOT IN (SELECT user_id FROM `order`);
 1. is_delete不用0，1  删除的改成时间或者主键id填充
 2. 反复修改同一条记录，但需要  流水表  记录操作
 
+## 42.什么是数据库的逻辑外键？数据库的物理外键和逻辑外键各有什么优缺点？
+1. 逻辑外键：应用层代码保证表与表之间的外键关系，数据库里面不建外键    优选
+2. 物理外键：数据库明确写FOREIGN KEY (user_id) REFERENCES user(id)
 
+## 43.MySQL 事务的二阶段提交是什么？
+1. 保证 binlog 与 InnoDB redo log 一致性
+2. prepare阶段：innodb层写redolog,标记为prepare
+3. commit阶段：server层把操作写到binlog,binlog成功后把redolog标记为commit
+### 为什么要有
+1. redo log（InnoDB）用于崩溃恢复 ；binlog（Server层）用于主从复制
+2. redo成功 / binlog失败，事务提交了，从库没数据
+3. binlog成功 / redo失败，事务没提交回滚了，从库有数据主库没有
+### 为什么可以解决
+发生宕机，redo = prepare，检查 binlog 写没写，如果写了则说明redolog还没来得及提交，直接提交；没有写则redo 没 commit，可以直接回滚
+https://pic.code-nav.cn/mianshiya/question_picture/1783388929455529986/yYl3cAym_image_mianshiya.webp
 
+## 44.MySQL 三层 B+ 树能存多少数据？
+2000万
+1. B+树一个节点就是一页 16kb
+2. 前两层存索引  一个索引由主键（8b）和指针(6b) 14字节  16kb / 14 b = 1170 个 也就是一页可以存1170个索引   两层一共索引 1170 * 1170 
+3. 最后一个页存数据 一条数据1kb 一个页存16条数据 
+4. 三层 B+ 树可以存 1170*1170*16 = 2190万条数据
+
+## 45. 为什么 MySQL 索引用的是 B+ 树而不是红黑树？
+1. IO次数少 每访问一个节点就是一次IO（查一条数据一个节点一个节点下来，就是一层一次IO）
+2. B+树一般就三层
+3. 红黑树每个节点只能2 个子节点，千万条数据有20几层
+4. B+树有序双向链表
+5. B+树非叶子节点不存数据，B树和红黑树每个节点都存数据
+6. 内存适合红黑树
+
+## 46.SQL 中 select、from、join、where、group by、having、order by、limit 的执行顺序是什么？
+select在having后面
+1. from 哪张表
+2. join 多表组合
+3. where 过滤行
+4. group by 分组
+5. having 对分组结果过滤
+6. select 选择列
+7. order by 排序
+8. limit 限制条数
+
+## 47.什么是 CDC（Change Data Capture）？常见的 CDC 工具有哪些？
+1. CDC（Change Data Capture）是一种用于捕获数据库中数据变化（如插入、更新、删除),然后进行同步到其他系统如（Kafka，Elasticsearch，数据仓库）
+2. 常见实现方式轮询、触发器 以及 基于数据库日志（如 MySQL binlog）的实现
+3. 常见的 CDC 工具有 Canal、Debezium、Maxwell 和 Flink CD
+
+## 48.多线程并发同步数据时（数据库的数据同步到数仓中）需要注意什么问题？
+在多线程并发同步数据过程中，需要重点关注顺序性、幂等性、事务一致性以及数据丢失或重复等问题。通常需要保证同一数据按照顺序处理，可以通过按主键分片实现；同时通过幂等机制避免重复数据问题；对于事务，要保证整体同步而不是拆分执行。此外，需要结合 offset 管理和重试机制来避免数据丢失，并通过合理的并发控制来避免更新冲突。
+MySQL
+↓
+binlog
+↓
+CDC（Canal / Flink CDC）
+↓
+Kafka（分区保证顺序）
+↓
+Flink / 消费程序
+↓
+数仓（ODS / DWD）
 
 
 
